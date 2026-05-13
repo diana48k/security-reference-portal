@@ -1,65 +1,204 @@
-import Image from "next/image";
+import Link from 'next/link'
+import type { ElementType } from 'react'
+import {
+  ArrowRight,
+  BookOpen,
+  Car,
+  DoorOpen,
+  Search,
+  ShieldCheck,
+} from 'lucide-react'
 
-export default function Home() {
+import { CaseCard } from '@/src/components/case-card'
+import { getHomePageData } from '@/src/lib/queries/home'
+
+const iconMap: Record<string, ElementType> = {
+  'shield-check': ShieldCheck,
+  car: Car,
+  columns: DoorOpen,
+  'door-open': DoorOpen,
+  clock: BookOpen,
+}
+
+export default async function HomePage() {
+  const { categories, featuredCases, latestCases, faqs } =
+    await getHomePageData()
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+    <main className="min-h-screen bg-slate-50">
+      <section className="border-b border-slate-200 bg-slate-950 text-white">
+        <div className="mx-auto max-w-7xl px-6 py-16 lg:px-8 lg:py-24">
+          <div className="max-w-4xl">
+            <div className="mb-6 inline-flex rounded-full border border-white/10 bg-white/10 px-4 py-2 text-sm text-slate-200">
+              Sales & Installation Reference Portal
+            </div>
+
+            <h1 className="text-4xl font-bold tracking-tight lg:text-6xl">
+              คู่มือกลางสำหรับทีมเซล ดูตัวอย่างงานติดตั้งจริงได้ทันที
+            </h1>
+
+            <p className="mt-6 max-w-3xl text-lg leading-8 text-slate-300">
+              ค้นหาเคสงาน Access Control, Time Attendance, Carpark, Flap
+              Barrier, Swing Gate และระบบอื่น ๆ เพื่อใช้พรีเซ้นท์ลูกค้า
+              ลดการถามซ้ำกับทีมเทคนิค และช่วยปิดการขายด้วยภาพงานจริง
+            </p>
+
+            <form
+              action="/search"
+              className="mt-10 flex max-w-3xl flex-col gap-3 rounded-2xl bg-white p-2 shadow-2xl sm:flex-row"
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+              <div className="flex flex-1 items-center gap-3 px-4">
+                <Search className="h-5 w-5 text-slate-400" />
+                <input
+                  name="q"
+                  placeholder="ค้นหา เช่น ประตูกระจก, โรงงาน, carpark, flap barrier..."
+                  className="h-12 w-full bg-transparent text-slate-950 outline-none placeholder:text-slate-400"
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="rounded-xl bg-slate-950 px-6 py-3 font-semibold text-white transition hover:bg-slate-800"
+              >
+                ค้นหาเคส
+              </button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-6 py-12 lg:px-8">
+        <div className="mb-8 flex items-end justify-between gap-6">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-wide text-slate-500">
+              Quick Categories
+            </p>
+            <h2 className="mt-2 text-3xl font-bold text-slate-950">
+              หมวดระบบหลัก
+            </h2>
+          </div>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+          {categories.map((category) => {
+            const Icon = iconMap[category.icon ?? ''] ?? ShieldCheck
+
+            return (
+              <Link
+                key={category.id}
+                href={`/categories/${category.slug}`}
+                className="group rounded-3xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
+              >
+                <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-950 text-white">
+                  <Icon className="h-6 w-6" />
+                </div>
+
+                <h3 className="font-semibold text-slate-950">
+                  {category.name_th}
+                </h3>
+
+                {category.description ? (
+                  <p className="mt-2 line-clamp-3 text-sm text-slate-600">
+                    {category.description}
+                  </p>
+                ) : null}
+
+                <div className="mt-5 flex items-center gap-2 text-sm font-medium text-slate-950">
+                  ดูหมวดนี้
+                  <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
+                </div>
+              </Link>
+            )
+          })}
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-6 py-12 lg:px-8">
+        <div className="mb-8 flex items-end justify-between gap-6">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-wide text-slate-500">
+              Featured Cases
+            </p>
+            <h2 className="mt-2 text-3xl font-bold text-slate-950">
+              เคสแนะนำสำหรับใช้ขายงาน
+            </h2>
+          </div>
+
+          <Link
+            href="/search"
+            className="hidden items-center gap-2 text-sm font-semibold text-slate-950 sm:flex"
+          >
+            ดูทั้งหมด
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+
+        {featuredCases.length > 0 ? (
+          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+            {featuredCases.map((caseStudy) => (
+              <CaseCard key={caseStudy.id} caseStudy={caseStudy} />
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-3xl border border-dashed border-slate-300 bg-white p-10 text-center text-slate-500">
+            ยังไม่มีเคสแนะนำ
+          </div>
+        )}
+      </section>
+
+      <section className="mx-auto max-w-7xl px-6 py-12 lg:px-8">
+        <div className="mb-8">
+          <p className="text-sm font-semibold uppercase tracking-wide text-slate-500">
+            Latest Cases
           </p>
+          <h2 className="mt-2 text-3xl font-bold text-slate-950">
+            งานติดตั้งล่าสุด
+          </h2>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
-  );
+
+        {latestCases.length > 0 ? (
+          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+            {latestCases.map((caseStudy) => (
+              <CaseCard key={caseStudy.id} caseStudy={caseStudy} />
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-3xl border border-dashed border-slate-300 bg-white p-10 text-center text-slate-500">
+            ยังไม่มีเคสในระบบ
+          </div>
+        )}
+      </section>
+
+      {faqs.length > 0 ? (
+        <section className="mx-auto max-w-7xl px-6 py-12 lg:px-8">
+          <div className="rounded-[2rem] bg-white p-8 shadow-sm ring-1 ring-slate-200 lg:p-10">
+            <div className="mb-8">
+              <p className="text-sm font-semibold uppercase tracking-wide text-slate-500">
+                FAQ
+              </p>
+              <h2 className="mt-2 text-3xl font-bold text-slate-950">
+                คำถามที่เซลถามบ่อย
+              </h2>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              {faqs.map((faq) => (
+                <div
+                  key={faq.id}
+                  className="rounded-2xl border border-slate-200 bg-slate-50 p-5"
+                >
+                  <h3 className="font-semibold text-slate-950">
+                    {faq.question}
+                  </h3>
+                  <p className="mt-2 line-clamp-3 text-sm leading-6 text-slate-600">
+                    {faq.answer}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      ) : null}
+    </main>
+  )
 }

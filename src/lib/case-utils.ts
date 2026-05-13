@@ -45,3 +45,36 @@ export function formatBudget(min?: number | null, max?: number | null) {
   if (min) return `เริ่มต้น ${formatter.format(min)}`
   return `ไม่เกิน ${formatter.format(max ?? 0)}`
 }
+
+export function getImagesByKind<
+  T extends {
+    kind: string
+    sort_order: number | null
+  },
+>(images: T[] | null | undefined, kind: string) {
+  if (!images) return []
+
+  return images
+    .filter((image) => image.kind === kind)
+    .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
+}
+
+export function sortBySortOrder<
+  T extends {
+    sort_order: number | null
+  },
+>(items: T[] | null | undefined) {
+  if (!items) return []
+
+  return [...items].sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
+}
+
+export function formatThaiDate(date?: string | null) {
+  if (!date) return 'ไม่ระบุวันที่'
+
+  return new Intl.DateTimeFormat('th-TH', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  }).format(new Date(date))
+}

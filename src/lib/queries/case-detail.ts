@@ -1,205 +1,162 @@
-import { createSupabaseServerClient } from '@/src/lib/supabase/server'
+import { notFound } from 'next/navigation'
+import { createSupabaseServerClient } from '@/lib/supabase/server'
 
-export type CaseLookup = {
-  slug: string
-  name_th: string
-  name_en: string | null
-}
-
-export type CaseDetailImage = {
-  id: string
-  kind: 'before' | 'after' | 'gallery' | 'diagram' | string
-  image_url: string | null
-  storage_path: string | null
-  caption: string | null
-  alt_text: string | null
-  sort_order: number | null
-}
-
-export type CaseDetailDocument = {
-  id: string
-  kind: string
-  file_url: string
-  file_name: string | null
-  description: string | null
-  sort_order: number | null
-}
-
-export type CaseDetailTag = {
-  slug: string
-  name_th: string
-  name_en: string | null
-}
-
-export type CaseDetail = {
-  id: string
-  slug: string
-  title: string
-  subtitle: string | null
-  location: string | null
-  customer_name: string | null
-  budget_min: number | null
-  budget_max: number | null
-  user_count: number | null
-  installation_days: number | null
-  installed_at: string | null
-  problem_statement: string | null
-  requirement_summary: string | null
-  solution_statement: string | null
-  installation_notes: string | null
-  customer_visible_notes: string | null
-  published_at: string | null
-  categories: CaseLookup | null
-  site_types: CaseLookup | null
-  door_types: CaseLookup | null
-  system_types: CaseLookup | null
-  case_images: CaseDetailImage[]
-  case_documents: CaseDetailDocument[]
-  tags: CaseDetailTag[]
-}
-
-type RawCaseTag = {
-  tags: CaseDetailTag | CaseDetailTag[] | null
-}
-
-type RawCaseDetail = Omit<
-  CaseDetail,
-  | 'categories'
-  | 'site_types'
-  | 'door_types'
-  | 'system_types'
-  | 'case_images'
-  | 'case_documents'
-  | 'tags'
-> & {
-  categories: CaseLookup | CaseLookup[] | null
-  site_types: CaseLookup | CaseLookup[] | null
-  door_types: CaseLookup | CaseLookup[] | null
-  system_types: CaseLookup | CaseLookup[] | null
-  case_images: CaseDetailImage[] | null
-  case_documents: CaseDetailDocument[] | null
-  case_tags: RawCaseTag[] | null
-}
-
-const CASE_DETAIL_SELECT = `
-  id,
-  slug,
-  title,
-  subtitle,
-  location,
-  customer_name,
-  budget_min,
-  budget_max,
-  user_count,
-  installation_days,
-  installed_at,
-  problem_statement,
-  requirement_summary,
-  solution_statement,
-  installation_notes,
-  customer_visible_notes,
-  published_at,
-  categories (
-    slug,
-    name_th,
-    name_en
-  ),
-  site_types (
-    slug,
-    name_th,
-    name_en
-  ),
-  door_types (
-    slug,
-    name_th,
-    name_en
-  ),
-  system_types (
-    slug,
-    name_th,
-    name_en
-  ),
-  case_images (
-    id,
-    kind,
-    image_url,
-    storage_path,
-    caption,
-    alt_text,
-    sort_order
-  ),
-  case_documents (
-    id,
-    kind,
-    file_url,
-    file_name,
-    description,
-    sort_order
-  ),
-  case_tags (
-    tags (
-      slug,
-      name_th,
-      name_en
-    )
-  )
-`
-
-function firstRelation<T>(relation: T | T[] | null): T | null {
-  if (Array.isArray(relation)) {
-    return relation[0] ?? null
-  }
-
-  return relation
-}
-
-function normalizeCaseDetail(caseDetail: RawCaseDetail): CaseDetail {
-  return {
-    ...caseDetail,
-    categories: firstRelation(caseDetail.categories),
-    site_types: firstRelation(caseDetail.site_types),
-    door_types: firstRelation(caseDetail.door_types),
-    system_types: firstRelation(caseDetail.system_types),
-    case_images: caseDetail.case_images ?? [],
-    case_documents: caseDetail.case_documents ?? [],
-    tags: (caseDetail.case_tags ?? [])
-      .map((caseTag) => firstRelation(caseTag.tags))
-      .filter((tag): tag is CaseDetailTag => Boolean(tag)),
-  }
-}
-
-export async function getCaseDetail(slug: string): Promise<CaseDetail | null> {
+export async function getCaseDetailBySlug(slug: string) {
   const supabase = await createSupabaseServerClient()
 
-  const { data, error } = await supabase
+  const { data: caseStudy, error } = await supabase
     .from('case_studies')
-    .select(CASE_DETAIL_SELECT)
+    .select(`
+      id,
+      slug,
+      title,
+      subtitle,
+      location,
+      customer_name,
+      budget_min,
+      budget_max,
+      user_count,
+      installation_days,
+      installed_at,
+      problem_statement,
+      requirement_summary,
+      solution_statement,
+      installation_notes,
+      sales_notes,
+      tech_notes,
+      customer_visible_notes,
+      status,
+      is_featured,
+      published_at,
+      category_id,
+      site_type_id,
+      door_type_id,
+      primary_system_type_id,
+      categories (
+        id,
+        slug,
+        name_th,
+        name_en,
+        description
+      ),
+      site_types (
+        id,
+        slug,
+        name_th,
+        name_en
+      ),
+      door_types (
+        id,
+        slug,
+        name_th,
+        name_en
+      ),
+      system_types (
+        id,
+        slug,
+        name_th,
+        name_en
+      ),
+      case_images (
+        id,
+        kind,
+        image_url,
+        caption,
+        alt_text,
+        sort_order
+      ),
+      case_documents (
+        id,
+        kind,
+        file_url,
+        file_name,
+        description,
+        sort_order
+      ),
+      case_tags (
+        tags (
+          id,
+          slug,
+          name_th,
+          name_en
+        )
+      ),
+      faqs (
+        id,
+        question,
+        answer,
+        sort_order
+      )
+    `)
     .eq('slug', slug)
     .eq('status', 'published')
-    .maybeSingle()
+    .single()
 
-  if (error) {
-    throw new Error(error.message)
+  if (error || !caseStudy) {
+    notFound()
   }
 
-  if (!data) {
-    return null
-  }
-
-  return normalizeCaseDetail(data as unknown as RawCaseDetail)
-}
-
-export async function getCaseSlugs(): Promise<string[]> {
-  const supabase = await createSupabaseServerClient()
-
-  const { data, error } = await supabase
+  const { data: relatedCases, error: relatedError } = await supabase
     .from('case_studies')
-    .select('slug')
+    .select(`
+      id,
+      slug,
+      title,
+      subtitle,
+      location,
+      budget_min,
+      budget_max,
+      installation_days,
+      published_at,
+      categories (
+        slug,
+        name_th,
+        name_en
+      ),
+      site_types (
+        slug,
+        name_th,
+        name_en
+      ),
+      door_types (
+        slug,
+        name_th,
+        name_en
+      ),
+      system_types (
+        slug,
+        name_th,
+        name_en
+      ),
+      case_images (
+        image_url,
+        kind,
+        caption,
+        sort_order
+      )
+    `)
     .eq('status', 'published')
+    .neq('id', caseStudy.id)
+    .or(
+      [
+        caseStudy.category_id ? `category_id.eq.${caseStudy.category_id}` : '',
+        caseStudy.site_type_id ? `site_type_id.eq.${caseStudy.site_type_id}` : '',
+        caseStudy.door_type_id ? `door_type_id.eq.${caseStudy.door_type_id}` : '',
+        caseStudy.primary_system_type_id
+          ? `primary_system_type_id.eq.${caseStudy.primary_system_type_id}`
+          : '',
+      ]
+        .filter(Boolean)
+        .join(',')
+    )
+    .limit(3)
 
-  if (error) {
-    throw new Error(error.message)
+  if (relatedError) {
+    throw new Error(relatedError.message)
   }
 
-  return (data ?? []).map((caseStudy) => caseStudy.slug as string)
+  return {
+    caseStudy,
+    relatedCases: relatedCases ?? [],
+  }
 }

@@ -1,14 +1,24 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { ArrowLeft, CalendarDays, Clock, MapPin, Users } from 'lucide-react'
+import {
+  ArrowLeft,
+  CalendarDays,
+  Clock,
+  ExternalLink,
+  FileText,
+  MapPin,
+  Users,
+} from 'lucide-react'
 
 import { CaseActions } from '@/src/components/case-actions'
 import { CaseGallery } from '@/src/components/case-gallery'
-import { formatBudget, formatThaiDate } from '@/src/lib/case-utils'
 import {
-  getCaseDetail,
-  type CaseLookup,
-} from '@/src/lib/queries/case-detail'
+  formatBudget,
+  formatThaiDate,
+  getCaseDocumentUrl,
+  sortBySortOrder,
+} from '@/src/lib/case-utils'
+import { getCaseDetail, type CaseLookup } from '@/src/lib/queries/case-detail'
 
 type CaseDetailPageProps = {
   params: Promise<{
@@ -44,6 +54,9 @@ export default async function CaseDetailPage({ params }: CaseDetailPageProps) {
     caseDetail.customer_visible_notes ??
     caseDetail.solution_statement ??
     caseDetail.requirement_summary
+  const documents = sortBySortOrder(caseDetail.case_documents).filter((document) =>
+    getCaseDocumentUrl(document),
+  )
 
   return (
     <main className="min-h-screen bg-slate-50">
@@ -93,12 +106,16 @@ export default async function CaseDetailPage({ params }: CaseDetailPageProps) {
           <CaseGallery images={caseDetail.case_images} title={caseDetail.title} />
 
           <section className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200 lg:p-8">
-            <h2 className="text-2xl font-bold text-slate-950">ภาพรวมงานติดตั้ง</h2>
+            <h2 className="text-2xl font-bold text-slate-950">
+              ภาพรวมงานติดตั้ง
+            </h2>
 
             <div className="mt-6 grid gap-6 md:grid-cols-2">
               {caseDetail.problem_statement ? (
                 <div>
-                  <h3 className="font-semibold text-slate-950">ปัญหาหรือโจทย์งาน</h3>
+                  <h3 className="font-semibold text-slate-950">
+                    ปัญหาหรือโจทย์งาน
+                  </h3>
                   <p className="mt-2 leading-7 text-slate-600">
                     {caseDetail.problem_statement}
                   </p>
@@ -107,7 +124,9 @@ export default async function CaseDetailPage({ params }: CaseDetailPageProps) {
 
               {caseDetail.requirement_summary ? (
                 <div>
-                  <h3 className="font-semibold text-slate-950">ความต้องการหลัก</h3>
+                  <h3 className="font-semibold text-slate-950">
+                    ความต้องการหลัก
+                  </h3>
                   <p className="mt-2 leading-7 text-slate-600">
                     {caseDetail.requirement_summary}
                   </p>
@@ -116,7 +135,9 @@ export default async function CaseDetailPage({ params }: CaseDetailPageProps) {
 
               {caseDetail.solution_statement ? (
                 <div>
-                  <h3 className="font-semibold text-slate-950">แนวทางที่ติดตั้ง</h3>
+                  <h3 className="font-semibold text-slate-950">
+                    แนวทางที่ติดตั้ง
+                  </h3>
                   <p className="mt-2 leading-7 text-slate-600">
                     {caseDetail.solution_statement}
                   </p>
@@ -125,7 +146,9 @@ export default async function CaseDetailPage({ params }: CaseDetailPageProps) {
 
               {caseDetail.installation_notes ? (
                 <div>
-                  <h3 className="font-semibold text-slate-950">หมายเหตุงานติดตั้ง</h3>
+                  <h3 className="font-semibold text-slate-950">
+                    หมายเหตุงานติดตั้ง
+                  </h3>
                   <p className="mt-2 leading-7 text-slate-600">
                     {caseDetail.installation_notes}
                   </p>
@@ -134,9 +157,58 @@ export default async function CaseDetailPage({ params }: CaseDetailPageProps) {
             </div>
           </section>
 
+          {documents.length > 0 ? (
+            <section className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200 lg:p-8">
+              <h2 className="text-2xl font-bold text-slate-950">
+                เอกสารประกอบ
+              </h2>
+              <div className="mt-5 grid gap-4 md:grid-cols-2">
+                {documents.map((document) => {
+                  const documentUrl = getCaseDocumentUrl(document)
+
+                  if (!documentUrl) return null
+
+                  return (
+                    <a
+                      key={document.id}
+                      href={documentUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="group rounded-2xl border border-slate-200 bg-slate-50 p-5 transition hover:border-slate-300 hover:bg-white"
+                    >
+                      <div className="flex items-start gap-4">
+                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-950 text-white">
+                          <FileText className="h-5 w-5" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center justify-between gap-3">
+                            <h3 className="font-semibold text-slate-950">
+                              {document.file_name ?? document.kind.toUpperCase()}
+                            </h3>
+                            <ExternalLink className="h-4 w-4 shrink-0 text-slate-400 transition group-hover:text-slate-950" />
+                          </div>
+                          {document.description ? (
+                            <p className="mt-2 text-sm leading-6 text-slate-600">
+                              {document.description}
+                            </p>
+                          ) : null}
+                          <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                            {document.kind}
+                          </p>
+                        </div>
+                      </div>
+                    </a>
+                  )
+                })}
+              </div>
+            </section>
+          ) : null}
+
           {visibleNotes ? (
             <section className="rounded-3xl bg-slate-950 p-6 text-white shadow-sm lg:p-8">
-              <h2 className="text-2xl font-bold">ข้อความสำหรับใช้พรีเซ้นท์ลูกค้า</h2>
+              <h2 className="text-2xl font-bold">
+                ข้อความสำหรับใช้พรีเซนต์ลูกค้า
+              </h2>
               <p className="mt-4 leading-8 text-slate-200">{visibleNotes}</p>
             </section>
           ) : null}

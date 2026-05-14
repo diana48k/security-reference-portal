@@ -17,6 +17,7 @@ export type HomeLookup = {
 
 export type HomeCaseImage = {
   image_url: string | null
+  storage_path: string | null
   kind: string
   caption: string | null
   sort_order: number | null
@@ -53,7 +54,7 @@ export type HomePageData = {
   faqs: HomeFaq[]
 }
 
-type RawHomeCase = Omit<
+export type RawHomeCase = Omit<
   HomeCase,
   'categories' | 'site_types' | 'door_types' | 'system_types'
 > & {
@@ -63,7 +64,7 @@ type RawHomeCase = Omit<
   system_types: HomeLookup | HomeLookup[] | null
 }
 
-const CASE_SELECT = `
+export const CASE_SELECT = `
   id,
   slug,
   title,
@@ -96,13 +97,14 @@ const CASE_SELECT = `
   ),
   case_images (
     image_url,
+    storage_path,
     kind,
     caption,
     sort_order
   )
 `
 
-function firstRelation<T>(relation: T | T[] | null): T | null {
+export function firstRelation<T>(relation: T | T[] | null): T | null {
   if (Array.isArray(relation)) {
     return relation[0] ?? null
   }
@@ -110,7 +112,7 @@ function firstRelation<T>(relation: T | T[] | null): T | null {
   return relation
 }
 
-function normalizeCase(caseStudy: RawHomeCase): HomeCase {
+export function normalizeCase(caseStudy: RawHomeCase): HomeCase {
   return {
     ...caseStudy,
     categories: firstRelation(caseStudy.categories),

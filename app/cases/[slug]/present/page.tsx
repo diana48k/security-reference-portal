@@ -1,8 +1,14 @@
+import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
 
-import { formatBudget, formatThaiDate, getPrimaryCaseImage } from '@/src/lib/case-utils'
+import {
+  formatBudget,
+  formatThaiDate,
+  getCaseImageUrl,
+  getPrimaryCaseImage,
+} from '@/src/lib/case-utils'
 import { getCaseDetail } from '@/src/lib/queries/case-detail'
 
 type PresentationPageProps = {
@@ -16,9 +22,7 @@ export async function generateMetadata({ params }: PresentationPageProps) {
   const caseDetail = await getCaseDetail(slug)
 
   return {
-    title: caseDetail
-      ? `Presentation: ${caseDetail.title}`
-      : 'ไม่พบเคส',
+    title: caseDetail ? `Presentation: ${caseDetail.title}` : 'ไม่พบเคส',
   }
 }
 
@@ -31,6 +35,7 @@ export default async function CasePresentationPage({ params }: PresentationPageP
   }
 
   const primaryImage = getPrimaryCaseImage(caseDetail.case_images)
+  const primaryImageUrl = primaryImage ? getCaseImageUrl(primaryImage) : null
 
   return (
     <main className="min-h-screen bg-slate-950 text-white">
@@ -95,16 +100,20 @@ export default async function CasePresentationPage({ params }: PresentationPageP
           </div>
 
           <div className="overflow-hidden rounded-[2rem] bg-white/10 ring-1 ring-white/10">
-            {primaryImage?.image_url ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={primaryImage.image_url}
-                alt={primaryImage.caption ?? caseDetail.title}
-                className="aspect-[16/11] h-full w-full object-cover"
-              />
+            {primaryImageUrl ? (
+              <div className="relative aspect-[16/11]">
+                <Image
+                  src={primaryImageUrl}
+                  alt={primaryImage?.caption ?? caseDetail.title}
+                  fill
+                  sizes="(min-width: 1024px) 45vw, 100vw"
+                  priority
+                  className="object-cover"
+                />
+              </div>
             ) : (
               <div className="flex aspect-[16/11] items-center justify-center text-slate-400">
-                ไม่มีรูปตัวอย่าง
+                ยังไม่มีรูปตัวอย่าง
               </div>
             )}
           </div>

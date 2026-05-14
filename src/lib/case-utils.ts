@@ -1,5 +1,6 @@
 type CaseImage = {
   image_url: string | null
+  storage_path?: string | null
   kind: string
   caption: string | null
   sort_order: number | null
@@ -7,13 +8,36 @@ type CaseImage = {
 
 const IMAGE_KIND_PRIORITY = ['after', 'gallery', 'before', 'diagram']
 
+function getPublicStorageUrl(bucket: string, storagePath?: string | null) {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+
+  if (!supabaseUrl || !storagePath) {
+    return null
+  }
+
+  return `${supabaseUrl}/storage/v1/object/public/${bucket}/${storagePath}`
+}
+
+export function getCaseImageUrl(image: Pick<CaseImage, 'image_url' | 'storage_path'>) {
+  return image.image_url ?? getPublicStorageUrl('case-images', image.storage_path)
+}
+
+export function getCaseDocumentUrl(document: {
+  file_url?: string | null
+  storage_path?: string | null
+}) {
+  return (
+    document.file_url ?? getPublicStorageUrl('case-documents', document.storage_path)
+  )
+}
+
 export function getPrimaryCaseImage(images: CaseImage[] | null | undefined) {
   if (!images || images.length === 0) {
     return null
   }
 
   const sortedImages = [...images]
-    .filter((image) => image.image_url)
+    .filter((image) => getCaseImageUrl(image))
     .sort((a, b) => {
       const priorityA = IMAGE_KIND_PRIORITY.indexOf(a.kind)
       const priorityB = IMAGE_KIND_PRIORITY.indexOf(b.kind)

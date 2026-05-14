@@ -19,7 +19,8 @@ export type CaseDetailImage = {
 export type CaseDetailDocument = {
   id: string
   kind: string
-  file_url: string
+  file_url: string | null
+  storage_path: string | null
   file_name: string | null
   description: string | null
   sort_order: number | null
@@ -132,6 +133,7 @@ const CASE_DETAIL_SELECT = `
     id,
     kind,
     file_url,
+    storage_path,
     file_name,
     description,
     sort_order

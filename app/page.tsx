@@ -38,9 +38,9 @@ export default async function HomePage() {
             </h1>
 
             <p className="mt-6 max-w-3xl text-lg leading-8 text-slate-300">
-              ค้นหาเคสงาน Access Control, Time Attendance, Carpark, Flap
-              Barrier, Swing Gate และระบบอื่น ๆ เพื่อใช้พรีเซ้นท์ลูกค้า
-              ลดการถามซ้ำกับทีมเทคนิค และช่วยปิดการขายด้วยภาพงานจริง
+              ค้นหาเคสงาน Access Control, Time Attendance, Carpark, Flap Barrier,
+              Swing Gate และระบบอื่น ๆ เพื่อใช้พรีเซนต์ลูกค้า ลดการถามซ้ำกับทีมเทคนิค
+              และช่วยปิดการขายด้วยภาพงานจริง
             </p>
 
             <form
@@ -63,6 +63,23 @@ export default async function HomePage() {
                 ค้นหาเคส
               </button>
             </form>
+
+            <div className="mt-4 flex flex-wrap gap-3">
+              <Link
+                href="/search"
+                className="inline-flex items-center gap-2 rounded-xl border border-white/15 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/10"
+              >
+                เปิดหน้า Search/Filter
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+              <Link
+                href="/search?featured=true&hasImages=true"
+                className="inline-flex items-center gap-2 rounded-xl border border-white/15 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/10"
+              >
+                ดูเคสแนะนำที่มีรูปจริง
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
           </div>
         </div>
       </section>
@@ -125,7 +142,7 @@ export default async function HomePage() {
           </div>
 
           <Link
-            href="/search"
+            href="/search?featured=true"
             className="hidden items-center gap-2 text-sm font-semibold text-slate-950 sm:flex"
           >
             ดูทั้งหมด
@@ -147,13 +164,23 @@ export default async function HomePage() {
       </section>
 
       <section className="mx-auto max-w-7xl px-6 py-12 lg:px-8">
-        <div className="mb-8">
-          <p className="text-sm font-semibold uppercase tracking-wide text-slate-500">
-            Latest Cases
-          </p>
-          <h2 className="mt-2 text-3xl font-bold text-slate-950">
-            งานติดตั้งล่าสุด
-          </h2>
+        <div className="mb-8 flex items-end justify-between gap-6">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-wide text-slate-500">
+              Latest Cases
+            </p>
+            <h2 className="mt-2 text-3xl font-bold text-slate-950">
+              งานติดตั้งล่าสุด
+            </h2>
+          </div>
+
+          <Link
+            href="/search"
+            className="hidden items-center gap-2 text-sm font-semibold text-slate-950 sm:flex"
+          >
+            ค้นหาเพิ่มเติม
+            <ArrowRight className="h-4 w-4" />
+          </Link>
         </div>
 
         {latestCases.length > 0 ? (

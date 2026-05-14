@@ -2,7 +2,11 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { ArrowRight, MapPin } from 'lucide-react'
 
-import { formatBudget, getPrimaryCaseImage } from '@/src/lib/case-utils'
+import {
+  formatBudget,
+  getCaseImageUrl,
+  getPrimaryCaseImage,
+} from '@/src/lib/case-utils'
 import type { HomeCase } from '@/src/lib/queries/home'
 
 type CaseCardProps = {
@@ -11,6 +15,7 @@ type CaseCardProps = {
 
 export function CaseCard({ caseStudy }: CaseCardProps) {
   const primaryImage = getPrimaryCaseImage(caseStudy.case_images)
+  const primaryImageUrl = primaryImage ? getCaseImageUrl(primaryImage) : null
 
   return (
     <Link
@@ -18,17 +23,17 @@ export function CaseCard({ caseStudy }: CaseCardProps) {
       className="group overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
     >
       <div className="relative aspect-[16/10] overflow-hidden bg-slate-100">
-        {primaryImage?.image_url ? (
+        {primaryImageUrl ? (
           <Image
-            src={primaryImage.image_url}
-            alt={primaryImage.caption ?? caseStudy.title}
+            src={primaryImageUrl}
+            alt={primaryImage?.caption ?? caseStudy.title}
             fill
             sizes="(min-width: 1280px) 25vw, (min-width: 768px) 50vw, 100vw"
             className="object-cover transition duration-500 group-hover:scale-105"
           />
         ) : (
           <div className="flex h-full items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 text-sm text-slate-500">
-            ไม่มีรูปตัวอย่าง
+            ยังไม่มีรูปตัวอย่าง
           </div>
         )}
 

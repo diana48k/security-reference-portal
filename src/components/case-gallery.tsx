@@ -1,6 +1,10 @@
 import Image from 'next/image'
 
-import { getImagesByKind, sortBySortOrder } from '@/src/lib/case-utils'
+import {
+  getCaseImageUrl,
+  getImagesByKind,
+  sortBySortOrder,
+} from '@/src/lib/case-utils'
 import type { CaseDetailImage } from '@/src/lib/queries/case-detail'
 
 type CaseGalleryProps = {
@@ -9,7 +13,9 @@ type CaseGalleryProps = {
 }
 
 function GalleryImage({ image, title }: { image: CaseDetailImage; title: string }) {
-  if (!image.image_url) {
+  const imageUrl = getCaseImageUrl(image)
+
+  if (!imageUrl) {
     return null
   }
 
@@ -17,7 +23,7 @@ function GalleryImage({ image, title }: { image: CaseDetailImage; title: string 
     <figure className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
       <div className="relative aspect-[16/10] bg-slate-100">
         <Image
-          src={image.image_url}
+          src={imageUrl}
           alt={image.alt_text ?? image.caption ?? title}
           fill
           sizes="(min-width: 1024px) 33vw, 100vw"
@@ -34,13 +40,14 @@ function GalleryImage({ image, title }: { image: CaseDetailImage; title: string 
 }
 
 export function CaseGallery({ images, title }: CaseGalleryProps) {
-  const beforeImages = getImagesByKind(images, 'before')
-  const afterImages = getImagesByKind(images, 'after')
+  const visibleImages = images.filter((image) => getCaseImageUrl(image))
+  const beforeImages = getImagesByKind(visibleImages, 'before')
+  const afterImages = getImagesByKind(visibleImages, 'after')
   const otherImages = sortBySortOrder(
-    images.filter((image) => !['before', 'after'].includes(image.kind)),
+    visibleImages.filter((image) => !['before', 'after'].includes(image.kind)),
   )
 
-  if (images.length === 0) {
+  if (visibleImages.length === 0) {
     return (
       <div className="rounded-3xl border border-dashed border-slate-300 bg-white p-10 text-center text-slate-500">
         ยังไม่มีรูปภาพสำหรับเคสนี้
@@ -81,11 +88,16 @@ export function CaseGallery({ images, title }: CaseGalleryProps) {
       )}
 
       {otherImages.length > 0 ? (
-        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-          {otherImages.map((image) => (
-            <GalleryImage key={image.id} image={image} title={title} />
-          ))}
-        </div>
+        <section>
+          <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">
+            Gallery
+          </h3>
+          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+            {otherImages.map((image) => (
+              <GalleryImage key={image.id} image={image} title={title} />
+            ))}
+          </div>
+        </section>
       ) : null}
     </div>
   )

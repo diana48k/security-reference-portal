@@ -212,6 +212,27 @@ export default async function CaseDetailPage({ params }: CaseDetailPageProps) {
               <p className="mt-4 leading-8 text-slate-200">{visibleNotes}</p>
             </section>
           ) : null}
+
+          {caseDetail.faqs.length > 0 ? (
+            <section className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200 lg:p-8">
+              <h2 className="text-2xl font-bold text-slate-950">FAQ</h2>
+              <div className="mt-5 space-y-4">
+                {caseDetail.faqs.map((faq) => (
+                  <div
+                    key={faq.id}
+                    className="rounded-2xl border border-slate-200 bg-slate-50 p-5"
+                  >
+                    <h3 className="font-semibold text-slate-950">
+                      {faq.question}
+                    </h3>
+                    <p className="mt-2 leading-7 text-slate-600">
+                      {faq.answer}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </section>
+          ) : null}
         </div>
 
         <aside className="space-y-6">

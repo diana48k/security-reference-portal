@@ -32,6 +32,14 @@ export type CaseDetailTag = {
   name_en: string | null
 }
 
+export type CaseDetailFaq = {
+  id: string
+  question: string
+  answer: string
+  is_active: boolean
+  sort_order: number | null
+}
+
 export type CaseDetail = {
   id: string
   slug: string
@@ -56,6 +64,7 @@ export type CaseDetail = {
   system_types: CaseLookup | null
   case_images: CaseDetailImage[]
   case_documents: CaseDetailDocument[]
+  faqs: CaseDetailFaq[]
   tags: CaseDetailTag[]
 }
 
@@ -71,6 +80,7 @@ type RawCaseDetail = Omit<
   | 'system_types'
   | 'case_images'
   | 'case_documents'
+  | 'faqs'
   | 'tags'
 > & {
   categories: CaseLookup | CaseLookup[] | null
@@ -79,6 +89,7 @@ type RawCaseDetail = Omit<
   system_types: CaseLookup | CaseLookup[] | null
   case_images: CaseDetailImage[] | null
   case_documents: CaseDetailDocument[] | null
+  faqs: CaseDetailFaq[] | null
   case_tags: RawCaseTag[] | null
 }
 
@@ -138,6 +149,13 @@ const CASE_DETAIL_SELECT = `
     description,
     sort_order
   ),
+  faqs (
+    id,
+    question,
+    answer,
+    is_active,
+    sort_order
+  ),
   case_tags (
     tags (
       slug,
@@ -164,6 +182,9 @@ function normalizeCaseDetail(caseDetail: RawCaseDetail): CaseDetail {
     system_types: firstRelation(caseDetail.system_types),
     case_images: caseDetail.case_images ?? [],
     case_documents: caseDetail.case_documents ?? [],
+    faqs: (caseDetail.faqs ?? [])
+      .filter((faq) => faq.is_active)
+      .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0)),
     tags: (caseDetail.case_tags ?? [])
       .map((caseTag) => firstRelation(caseTag.tags))
       .filter((tag): tag is CaseDetailTag => Boolean(tag)),

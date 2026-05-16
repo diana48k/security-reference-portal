@@ -34,6 +34,7 @@ export default async function AdminNewCasePage() {
       </section>
 
       <AdminCaseForm
+        mode="create"
         categories={categories}
         siteTypes={siteTypes}
         doorTypes={doorTypes}

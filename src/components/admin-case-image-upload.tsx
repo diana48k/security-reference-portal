@@ -1,6 +1,8 @@
 import Image from 'next/image'
 import { ImageIcon, Trash2 } from 'lucide-react'
 
+import { ConfirmActionButton } from '@/src/components/confirm-action-button'
+import { SubmitButton } from '@/src/components/submit-button'
 import {
   deleteCaseImageAction,
   uploadCaseImageAction,
@@ -94,12 +96,12 @@ export function AdminCaseImageUpload({
         </Field>
 
         <div className="flex items-end">
-          <button
-            type="submit"
+          <SubmitButton
+            pendingText="Uploading..."
             className="h-11 rounded-xl bg-slate-950 px-5 text-sm font-semibold text-white transition hover:bg-slate-800"
           >
             Upload image
-          </button>
+          </SubmitButton>
         </div>
       </form>
 
@@ -141,13 +143,14 @@ export function AdminCaseImageUpload({
 
                   <form action={deleteCaseImageAction}>
                     <input type="hidden" name="image_id" value={image.id} />
-                    <button
-                      type="submit"
+                    <ConfirmActionButton
+                      confirmMessage={`Delete image "${image.caption ?? image.storage_path ?? image.id}"?`}
+                      pendingText="Deleting..."
                       className="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 transition hover:bg-red-100"
                     >
                       <Trash2 className="h-4 w-4" />
                       Delete image
-                    </button>
+                    </ConfirmActionButton>
                   </form>
                 </div>
               </article>

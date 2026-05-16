@@ -16,6 +16,44 @@ const DOCUMENT_KINDS = [
   'quotation_example',
   'other',
 ] as const
+const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024
+const MAX_DOCUMENT_SIZE_BYTES = 20 * 1024 * 1024
+const ALLOWED_IMAGE_MIME_TYPES = [
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'image/gif',
+]
+const ALLOWED_IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp', 'gif']
+const ALLOWED_DOCUMENT_MIME_TYPES = [
+  'application/octet-stream',
+  'application/acad',
+  'application/x-acad',
+  'application/autocad_dwg',
+  'application/dxf',
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/vnd.ms-excel',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'application/vnd.ms-powerpoint',
+  'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+  'image/vnd.dwg',
+  'image/vnd.dxf',
+  ...ALLOWED_IMAGE_MIME_TYPES,
+]
+const ALLOWED_DOCUMENT_EXTENSIONS = [
+  'pdf',
+  'dwg',
+  'dxf',
+  'doc',
+  'docx',
+  'xls',
+  'xlsx',
+  'ppt',
+  'pptx',
+  ...ALLOWED_IMAGE_EXTENSIONS,
+]
 
 type CaseStatus = (typeof CASE_STATUSES)[number]
 type ImageKind = (typeof IMAGE_KINDS)[number]
@@ -80,14 +118,15 @@ function parseSortOrder(value: FormDataEntryValue | null) {
   return parseNumber(value) ?? 0
 }
 
-function sanitizeFileName(fileName: string) {
-  const normalized = fileName
-    .toLowerCase()
-    .replace(/[^a-z0-9._-]+/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-+|-+$/g, '')
+function getSafeFileExtension(fileName: string) {
+  const extension = fileName.split('.').pop()?.toLowerCase() ?? ''
+  const safeExtension = extension.replace(/[^a-z0-9]/g, '')
 
-  return normalized || 'upload'
+  if (!safeExtension) {
+    throw new Error('Uploaded file must have a valid file extension.')
+  }
+
+  return safeExtension
 }
 
 function getUploadedFile(formData: FormData, fieldName = 'file') {
@@ -98,6 +137,36 @@ function getUploadedFile(formData: FormData, fieldName = 'file') {
   }
 
   return file
+}
+
+function assertMaxFileSize(file: File, maxSize: number, label: string) {
+  if (file.size > maxSize) {
+    throw new Error(`${label} is too large. Maximum size is ${Math.floor(maxSize / 1024 / 1024)}MB.`)
+  }
+}
+
+function assertAllowedFileType({
+  file,
+  extension,
+  allowedMimeTypes,
+  allowedExtensions,
+  label,
+}: {
+  file: File
+  extension: string
+  allowedMimeTypes: string[]
+  allowedExtensions: string[]
+  label: string
+}) {
+  const hasAllowedExtension = allowedExtensions.includes(extension)
+  const hasAllowedMimeType =
+    !file.type || allowedMimeTypes.includes(file.type.toLowerCase())
+
+  if (!hasAllowedExtension || !hasAllowedMimeType) {
+    throw new Error(
+      `${label} type is not allowed. Please upload an approved file type.`,
+    )
+  }
 }
 
 function buildCasePayload(formData: FormData, userId: string) {
@@ -309,12 +378,19 @@ export async function uploadCaseImageAction(formData: FormData) {
     throw new Error('Case id is required.')
   }
 
-  if (!file.type.startsWith('image/')) {
-    throw new Error('Please upload an image file.')
-  }
+  const fileExt = getSafeFileExtension(file.name)
+  assertMaxFileSize(file, MAX_IMAGE_SIZE_BYTES, 'Image')
+  assertAllowedFileType({
+    file,
+    extension: fileExt,
+    allowedMimeTypes: ALLOWED_IMAGE_MIME_TYPES,
+    allowedExtensions: ALLOWED_IMAGE_EXTENSIONS,
+    label: 'Image',
+  })
 
   const existingCase = await getExistingCase(caseId)
-  const storagePath = `${caseId}/${Date.now()}-${sanitizeFileName(file.name)}`
+  const safeFileName = `${kind}-${Date.now()}.${fileExt}`
+  const storagePath = `${caseId}/${safeFileName}`
   const { error: uploadError } = await supabase.storage
     .from('case-images')
     .upload(storagePath, file, {
@@ -323,7 +399,7 @@ export async function uploadCaseImageAction(formData: FormData) {
     })
 
   if (uploadError) {
-    throw new Error(uploadError.message)
+    throw new Error(`Could not upload image. ${uploadError.message}`)
   }
 
   const {
@@ -342,7 +418,7 @@ export async function uploadCaseImageAction(formData: FormData) {
 
   if (insertError) {
     await supabase.storage.from('case-images').remove([storagePath])
-    throw new Error(insertError.message)
+    throw new Error(`Image uploaded, but the image record could not be saved. ${insertError.message}`)
   }
 
   revalidateCasePaths(existingCase.slug)
@@ -361,8 +437,19 @@ export async function uploadCaseDocumentAction(formData: FormData) {
     throw new Error('Case id is required.')
   }
 
+  const fileExt = getSafeFileExtension(file.name)
+  assertMaxFileSize(file, MAX_DOCUMENT_SIZE_BYTES, 'Document')
+  assertAllowedFileType({
+    file,
+    extension: fileExt,
+    allowedMimeTypes: ALLOWED_DOCUMENT_MIME_TYPES,
+    allowedExtensions: ALLOWED_DOCUMENT_EXTENSIONS,
+    label: 'Document',
+  })
+
   const existingCase = await getExistingCase(caseId)
-  const storagePath = `${caseId}/${Date.now()}-${sanitizeFileName(file.name)}`
+  const safeFileName = `${kind}-${Date.now()}.${fileExt}`
+  const storagePath = `${caseId}/${safeFileName}`
   const { error: uploadError } = await supabase.storage
     .from('case-documents')
     .upload(storagePath, file, {
@@ -371,7 +458,7 @@ export async function uploadCaseDocumentAction(formData: FormData) {
     })
 
   if (uploadError) {
-    throw new Error(uploadError.message)
+    throw new Error(`Could not upload document. ${uploadError.message}`)
   }
 
   const {
@@ -390,7 +477,7 @@ export async function uploadCaseDocumentAction(formData: FormData) {
 
   if (insertError) {
     await supabase.storage.from('case-documents').remove([storagePath])
-    throw new Error(insertError.message)
+    throw new Error(`Document uploaded, but the document record could not be saved. ${insertError.message}`)
   }
 
   revalidateCasePaths(existingCase.slug)

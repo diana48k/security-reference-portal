@@ -121,6 +121,10 @@ export async function updateTaxonomyAction(formData: FormData) {
 }
 
 export async function deleteTaxonomyAction(formData: FormData) {
+  return deactivateTaxonomyAction(formData)
+}
+
+export async function deactivateTaxonomyAction(formData: FormData) {
   await getCurrentAdminUser()
 
   const supabase = await createSupabaseServerClient()
@@ -131,7 +135,34 @@ export async function deleteTaxonomyAction(formData: FormData) {
     throw new Error('Taxonomy id is required.')
   }
 
-  const { error } = await supabase.from(table).delete().eq('id', id)
+  const { error } = await supabase
+    .from(table)
+    .update({ is_active: false })
+    .eq('id', id)
+
+  if (error) {
+    throw new Error(error.message)
+  }
+
+  revalidateTaxonomyPaths()
+  redirect('/admin/taxonomy')
+}
+
+export async function activateTaxonomyAction(formData: FormData) {
+  await getCurrentAdminUser()
+
+  const supabase = await createSupabaseServerClient()
+  const table = parseTable(formData.get('table'))
+  const id = textValue(formData.get('id'))
+
+  if (!id) {
+    throw new Error('Taxonomy id is required.')
+  }
+
+  const { error } = await supabase
+    .from(table)
+    .update({ is_active: true })
+    .eq('id', id)
 
   if (error) {
     throw new Error(error.message)

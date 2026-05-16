@@ -1,8 +1,11 @@
-import { Trash2 } from 'lucide-react'
+import { Eye, EyeOff } from 'lucide-react'
 
+import { ConfirmActionButton } from '@/src/components/confirm-action-button'
+import { SubmitButton } from '@/src/components/submit-button'
 import {
+  activateTaxonomyAction,
   createTaxonomyAction,
-  deleteTaxonomyAction,
+  deactivateTaxonomyAction,
   updateTaxonomyAction,
 } from '@/src/lib/actions/taxonomy'
 import type {
@@ -54,12 +57,12 @@ export function AdminTaxonomySection({ section }: AdminTaxonomySectionProps) {
           Active
         </label>
         <div className="flex items-end">
-          <button
-            type="submit"
+          <SubmitButton
+            pendingText="Adding..."
             className="h-11 rounded-xl bg-slate-950 px-5 text-sm font-semibold text-white transition hover:bg-slate-800"
           >
             Add
-          </button>
+          </SubmitButton>
         </div>
       </form>
 
@@ -122,25 +125,43 @@ function TaxonomyItemForm({
           Active
         </label>
         <div className="flex items-end gap-2">
-          <button
-            type="submit"
+          <SubmitButton
+            pendingText="Saving..."
             className="h-11 rounded-xl bg-slate-950 px-4 text-sm font-semibold text-white transition hover:bg-slate-800"
           >
             Save
-          </button>
+          </SubmitButton>
         </div>
       </form>
 
-      <form action={deleteTaxonomyAction} className="mt-3">
+      <form
+        action={
+          item.is_active ? deactivateTaxonomyAction : activateTaxonomyAction
+        }
+        className="mt-3"
+      >
         <input type="hidden" name="table" value={section.table} />
         <input type="hidden" name="id" value={item.id} />
-        <button
-          type="submit"
-          className="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 transition hover:bg-red-100"
+        <ConfirmActionButton
+          confirmMessage={
+            item.is_active
+              ? `Deactivate "${item.name_th}"? It will disappear from public filters and case forms.`
+              : `Activate "${item.name_th}"? It will be available in public filters and case forms.`
+          }
+          pendingText={item.is_active ? 'Deactivating...' : 'Activating...'}
+          className={
+            item.is_active
+              ? 'inline-flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-700 transition hover:bg-amber-100'
+              : 'inline-flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700 transition hover:bg-emerald-100'
+          }
         >
-          <Trash2 className="h-4 w-4" />
-          Delete
-        </button>
+          {item.is_active ? (
+            <EyeOff className="h-4 w-4" />
+          ) : (
+            <Eye className="h-4 w-4" />
+          )}
+          {item.is_active ? 'Deactivate' : 'Activate'}
+        </ConfirmActionButton>
       </form>
     </div>
   )

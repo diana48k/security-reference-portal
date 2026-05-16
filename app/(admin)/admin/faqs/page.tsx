@@ -1,5 +1,7 @@
 import { HelpCircle, Trash2 } from 'lucide-react'
 
+import { ConfirmActionButton } from '@/src/components/confirm-action-button'
+import { SubmitButton } from '@/src/components/submit-button'
 import {
   createFaqAction,
   deleteFaqAction,
@@ -118,13 +120,14 @@ function FaqItem({
 
       <form action={deleteFaqAction} className="mt-3">
         <input type="hidden" name="id" value={faq.id} />
-        <button
-          type="submit"
+        <ConfirmActionButton
+          confirmMessage={`Delete FAQ "${faq.question}"?`}
+          pendingText="Deleting..."
           className="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 transition hover:bg-red-100"
         >
           <Trash2 className="h-4 w-4" />
           Delete
-        </button>
+        </ConfirmActionButton>
       </form>
     </article>
   )
@@ -224,12 +227,12 @@ function FaqForm({
       </div>
 
       <div>
-        <button
-          type="submit"
+        <SubmitButton
+          pendingText={faq ? 'Saving...' : 'Adding...'}
           className="rounded-xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
         >
           {faq ? 'Save FAQ' : 'Add FAQ'}
-        </button>
+        </SubmitButton>
       </div>
     </form>
   )

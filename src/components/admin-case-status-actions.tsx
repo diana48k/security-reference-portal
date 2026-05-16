@@ -1,13 +1,9 @@
 'use client'
 
-import {
-  Archive,
-  EyeOff,
-  Send,
-  Trash2,
-  Undo2,
-} from 'lucide-react'
+import { Archive, EyeOff, Send, Trash2, Undo2 } from 'lucide-react'
 
+import { ConfirmActionButton } from '@/src/components/confirm-action-button'
+import { SubmitButton } from '@/src/components/submit-button'
 import {
   deleteCaseStudyAction,
   updateCaseStatusAction,
@@ -44,26 +40,16 @@ export function AdminCaseStatusActions({
           <StatusForm id={id} status="draft" label="Restore draft" icon="restore" />
         )}
 
-        <form
-          action={deleteCaseStudyAction}
-          onSubmit={(event) => {
-            if (
-              !window.confirm(
-                `Delete "${title}"? This cannot be undone.`,
-              )
-            ) {
-              event.preventDefault()
-            }
-          }}
-        >
+        <form action={deleteCaseStudyAction}>
           <input type="hidden" name="id" value={id} />
-          <button
-            type="submit"
+          <ConfirmActionButton
+            confirmMessage={`Delete "${title}"? This cannot be undone.`}
+            pendingText="Deleting..."
             className="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-100"
           >
             <Trash2 className="h-4 w-4" />
             Delete
-          </button>
+          </ConfirmActionButton>
         </form>
       </div>
     </div>
@@ -94,13 +80,13 @@ function StatusForm({
     <form action={updateCaseStatusAction}>
       <input type="hidden" name="id" value={id} />
       <input type="hidden" name="status" value={status} />
-      <button
-        type="submit"
+      <SubmitButton
+        pendingText="Updating..."
         className="inline-flex items-center gap-2 rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
       >
         <Icon className="h-4 w-4" />
         {label}
-      </button>
+      </SubmitButton>
     </form>
   )
 }

@@ -1,5 +1,6 @@
 import Link from 'next/link'
 
+import { SubmitButton } from '@/src/components/submit-button'
 import {
   createCaseStudyAction,
   updateCaseStudyAction,
@@ -250,12 +251,12 @@ export function AdminCaseForm({
       </section>
 
       <div className="flex flex-wrap gap-3">
-        <button
-          type="submit"
-          className="rounded-xl bg-slate-950 px-6 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+        <SubmitButton
+          pendingText={mode === 'edit' ? 'Saving...' : 'Creating...'}
+          className="rounded-xl bg-slate-950 px-6 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-400"
         >
           {mode === 'edit' ? 'Save changes' : 'Create case'}
-        </button>
+        </SubmitButton>
 
         <Link
           href="/admin/cases"

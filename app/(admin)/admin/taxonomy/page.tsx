@@ -4,7 +4,7 @@ import { AdminTaxonomySection } from '@/src/components/admin-taxonomy-section'
 import { getAdminTaxonomyPageData } from '@/src/lib/queries/admin-taxonomy'
 
 export const metadata = {
-  title: 'Taxonomy | Security Reference Portal',
+  title: 'Taxonomy',
 }
 
 export default async function AdminTaxonomyPage() {

@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
 
 import { CaseCard } from '@/src/components/case-card'
+import { SiteFooter } from '@/src/components/site-footer'
 import { getCategoryPageData } from '@/src/lib/queries/category'
 
 type CategoryPageProps = {
@@ -22,7 +23,7 @@ export async function generateMetadata({ params }: CategoryPageProps) {
   }
 
   return {
-    title: `${data.category.name_th} | Security Reference Portal`,
+    title: data.category.name_th,
     description: data.category.description ?? undefined,
   }
 }
@@ -119,6 +120,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
           </aside>
         </div>
       </section>
+      <SiteFooter />
     </main>
   )
 }

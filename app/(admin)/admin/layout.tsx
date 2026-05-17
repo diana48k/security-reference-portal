@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { FolderKanban, HelpCircle, LayoutDashboard, Tags } from 'lucide-react'
 
+import { BrandLogo } from '@/src/components/brand-logo'
 import { LogoutButton } from '@/src/components/logout-button'
 import { getCurrentAdminUser } from '@/src/lib/queries/admin'
 
@@ -39,8 +40,8 @@ export default async function AdminLayout({
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex max-w-7xl flex-col gap-5 px-6 py-5 lg:flex-row lg:items-center lg:justify-between lg:px-8">
           <div>
-            <Link href="/admin" className="text-xl font-bold text-slate-950">
-              Security Admin
+            <Link href="/admin">
+              <BrandLogo />
             </Link>
             <p className="mt-1 text-sm text-slate-600">
               {profile.full_name ?? user.email} - {profile.role}
@@ -70,6 +71,9 @@ export default async function AdminLayout({
       </header>
 
       <div className="mx-auto max-w-7xl px-6 py-8 lg:px-8">{children}</div>
+      <footer className="border-t border-slate-200 bg-white px-6 py-4 text-center text-xs text-slate-500">
+        © Tigersoft Installation Reference Portal. Admin workspace.
+      </footer>
     </main>
   )
 }

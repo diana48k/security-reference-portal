@@ -1,8 +1,8 @@
 import Link from 'next/link'
-import { Eye, Plus } from 'lucide-react'
+import { AlertTriangle, CheckCircle2, Eye, Plus } from 'lucide-react'
 
 import { formatBudget } from '@/src/lib/case-utils'
-import { getAdminCases } from '@/src/lib/queries/admin-cases'
+import { getAdminCases, type AdminCase } from '@/src/lib/queries/admin-cases'
 
 export default async function AdminCasesPage() {
   const cases = await getAdminCases()
@@ -45,7 +45,7 @@ export default async function AdminCasesPage() {
 
         {cases.length > 0 ? (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[960px] text-left">
+            <table className="w-full min-w-[1120px] text-left">
               <thead className="bg-slate-50 text-sm text-slate-500">
                 <tr>
                   <th className="px-6 py-4 font-semibold">ชื่อเคส</th>
@@ -54,6 +54,7 @@ export default async function AdminCasesPage() {
                   <th className="px-6 py-4 font-semibold">ประตู/ระบบ</th>
                   <th className="px-6 py-4 font-semibold">งบประมาณ</th>
                   <th className="px-6 py-4 font-semibold">สถานะ</th>
+                  <th className="px-6 py-4 font-semibold">Quality checklist</th>
                   <th className="px-6 py-4 font-semibold">Action</th>
                 </tr>
               </thead>
@@ -112,6 +113,10 @@ export default async function AdminCasesPage() {
                     </td>
 
                     <td className="px-6 py-5">
+                      <QualityChecklist caseStudy={caseStudy} />
+                    </td>
+
+                    <td className="px-6 py-5">
                       <div className="flex flex-wrap gap-2">
                         {caseStudy.status === 'published' ? (
                           <Link
@@ -154,6 +159,60 @@ export default async function AdminCasesPage() {
           </div>
         )}
       </section>
+    </div>
+  )
+}
+
+function getQualityIssues(caseStudy: AdminCase) {
+  const hasBeforeImage = caseStudy.case_images.some(
+    (image) => image.kind === 'before' && Boolean(image.image_url ?? image.storage_path),
+  )
+  const hasAfterImage = caseStudy.case_images.some(
+    (image) => image.kind === 'after' && Boolean(image.image_url ?? image.storage_path),
+  )
+  const hasPdf = caseStudy.case_documents.some(
+    (document) =>
+      document.kind === 'pdf' && Boolean(document.file_url ?? document.storage_path),
+  )
+
+  return [
+    !hasBeforeImage ? 'ไม่มี Before image' : null,
+    !hasAfterImage ? 'ไม่มี After image' : null,
+    !hasPdf ? 'ไม่มี PDF' : null,
+    !caseStudy.customer_visible_notes ? 'ไม่มี Customer Visible Notes' : null,
+    caseStudy.status === 'draft' ? 'ยังเป็น Draft' : null,
+    !caseStudy.sales_notes ? 'ไม่มี Sales Notes' : null,
+  ].filter((issue): issue is string => Boolean(issue))
+}
+
+function QualityChecklist({ caseStudy }: { caseStudy: AdminCase }) {
+  const issues = getQualityIssues(caseStudy)
+
+  if (issues.length === 0) {
+    return (
+      <div className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
+        <CheckCircle2 className="h-4 w-4" />
+        พร้อมส่งให้เซล
+      </div>
+    )
+  }
+
+  return (
+    <div className="max-w-[260px] space-y-2">
+      <div className="inline-flex items-center gap-2 rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700">
+        <AlertTriangle className="h-4 w-4" />
+        ต้องเติม {issues.length} รายการ
+      </div>
+      <div className="flex flex-wrap gap-1.5">
+        {issues.map((issue) => (
+          <span
+            key={issue}
+            className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600"
+          >
+            {issue}
+          </span>
+        ))}
+      </div>
     </div>
   )
 }

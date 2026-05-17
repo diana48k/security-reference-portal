@@ -1,8 +1,10 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Building2, History, ShieldCheck } from 'lucide-react'
 
+import { BrandLogo } from '@/src/components/brand-logo'
+import { PresentationActions } from '@/src/components/presentation-actions'
 import {
   formatBudget,
   formatThaiDate,
@@ -22,7 +24,7 @@ export async function generateMetadata({ params }: PresentationPageProps) {
   const caseDetail = await getCaseDetail(slug)
 
   return {
-    title: caseDetail ? `Presentation: ${caseDetail.title}` : 'ไม่พบเคส',
+    title: caseDetail ? `Sales Deck: ${caseDetail.title}` : 'ไม่พบเคส',
   }
 }
 
@@ -40,15 +42,18 @@ export default async function CasePresentationPage({ params }: PresentationPageP
   return (
     <main className="min-h-screen bg-slate-950 text-white">
       <div className="mx-auto flex min-h-screen max-w-7xl flex-col px-6 py-8 lg:px-8">
-        <div className="flex items-center justify-between gap-4">
-          <Link
-            href={`/cases/${caseDetail.slug}`}
-            className="inline-flex items-center gap-2 text-sm font-semibold text-slate-300 transition hover:text-white"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            กลับหน้าเคส
-          </Link>
-          <div className="text-sm text-slate-400">Presentation Mode</div>
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+            <Link
+              href={`/cases/${caseDetail.slug}`}
+              className="inline-flex items-center gap-2 text-sm font-semibold text-slate-300 transition hover:text-white print:hidden"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              กลับหน้าเคส
+            </Link>
+            <BrandLogo tone="light" />
+          </div>
+          <PresentationActions title={caseDetail.title} />
         </div>
 
         <section className="grid flex-1 items-center gap-10 py-12 lg:grid-cols-[1.1fr_0.9fr]">
@@ -75,8 +80,37 @@ export default async function CasePresentationPage({ params }: PresentationPageP
               </p>
             ) : null}
 
-            <div className="mt-10 grid gap-4 sm:grid-cols-3">
-              <div className="rounded-3xl bg-white/10 p-5 ring-1 ring-white/10">
+            <div className="mt-8 grid gap-3 sm:grid-cols-3">
+              {[
+                {
+                  icon: ShieldCheck,
+                  label: 'ควบคุมการเข้าออก',
+                },
+                {
+                  icon: History,
+                  label: 'ตรวจสอบย้อนหลังได้',
+                },
+                {
+                  icon: Building2,
+                  label: 'เหมาะกับโรงงาน/ออฟฟิศ',
+                },
+              ].map((benefit) => {
+                const Icon = benefit.icon
+
+                return (
+                  <div
+                    key={benefit.label}
+                    className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/10 p-4 text-sm font-semibold text-white"
+                  >
+                    <Icon className="h-5 w-5 text-red-300" />
+                    {benefit.label}
+                  </div>
+                )
+              })}
+            </div>
+
+            <div className="mt-6 grid gap-4 sm:grid-cols-3">
+              <div className="presentation-budget rounded-3xl bg-white/10 p-5 ring-1 ring-white/10">
                 <div className="text-sm text-slate-400">งบประมาณ</div>
                 <div className="mt-2 font-bold">
                   {formatBudget(caseDetail.budget_min, caseDetail.budget_max)}

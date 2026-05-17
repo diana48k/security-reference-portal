@@ -62,7 +62,7 @@ const quickLinks = [
 ]
 
 export const metadata = {
-  title: 'Admin Dashboard | Security Reference Portal',
+  title: 'Admin Dashboard',
 }
 
 export default async function AdminDashboardPage() {

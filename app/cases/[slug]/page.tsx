@@ -12,6 +12,7 @@ import {
 
 import { CaseActions } from '@/src/components/case-actions'
 import { CaseGallery } from '@/src/components/case-gallery'
+import { SiteFooter } from '@/src/components/site-footer'
 import {
   formatBudget,
   formatThaiDate,
@@ -37,7 +38,7 @@ export async function generateMetadata({ params }: CaseDetailPageProps) {
   }
 
   return {
-    title: `${caseDetail.title} | Security Reference Portal`,
+    title: caseDetail.title,
     description: caseDetail.subtitle ?? caseDetail.customer_visible_notes ?? undefined,
   }
 }
@@ -311,6 +312,7 @@ export default async function CaseDetailPage({ params }: CaseDetailPageProps) {
           </section>
         </aside>
       </section>
+      <SiteFooter />
     </main>
   )
 }

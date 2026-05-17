@@ -4,7 +4,7 @@ import { ShieldCheck } from 'lucide-react'
 import { LoginForm } from '@/src/components/login-form'
 
 export const metadata = {
-  title: 'Login | Security Reference Portal',
+  title: 'Login',
 }
 
 export default function LoginPage() {

@@ -16,12 +16,28 @@ export type AdminCase = {
   budget_min: number | null
   budget_max: number | null
   installation_days: number | null
+  customer_visible_notes: string | null
+  sales_notes: string | null
   published_at: string | null
   created_at: string
   categories: AdminCaseLookup | null
   site_types: AdminCaseLookup | null
   door_types: AdminCaseLookup | null
   system_types: AdminCaseLookup | null
+  case_images: AdminCaseMediaItem[]
+  case_documents: AdminCaseDocumentItem[]
+}
+
+export type AdminCaseMediaItem = {
+  kind: string
+  image_url: string | null
+  storage_path: string | null
+}
+
+export type AdminCaseDocumentItem = {
+  kind: string
+  file_url: string | null
+  storage_path: string | null
 }
 
 export type AdminCaseDetail = {
@@ -96,6 +112,8 @@ type RawAdminCase = Omit<
   site_types: AdminCaseLookup | AdminCaseLookup[] | null
   door_types: AdminCaseLookup | AdminCaseLookup[] | null
   system_types: AdminCaseLookup | AdminCaseLookup[] | null
+  case_images: AdminCaseMediaItem[] | null
+  case_documents: AdminCaseDocumentItem[] | null
 }
 
 function firstRelation<T>(relation: T | T[] | null): T | null {
@@ -113,6 +131,8 @@ function normalizeAdminCase(caseStudy: RawAdminCase): AdminCase {
     site_types: firstRelation(caseStudy.site_types),
     door_types: firstRelation(caseStudy.door_types),
     system_types: firstRelation(caseStudy.system_types),
+    case_images: caseStudy.case_images ?? [],
+    case_documents: caseStudy.case_documents ?? [],
   }
 }
 
@@ -132,6 +152,8 @@ export async function getAdminCases(): Promise<AdminCase[]> {
       budget_min,
       budget_max,
       installation_days,
+      customer_visible_notes,
+      sales_notes,
       published_at,
       created_at,
       categories (
@@ -149,6 +171,16 @@ export async function getAdminCases(): Promise<AdminCase[]> {
       system_types (
         name_th,
         slug
+      ),
+      case_images (
+        kind,
+        image_url,
+        storage_path
+      ),
+      case_documents (
+        kind,
+        file_url,
+        storage_path
       )
     `)
     .order('created_at', { ascending: false })

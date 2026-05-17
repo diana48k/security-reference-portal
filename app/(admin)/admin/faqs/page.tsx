@@ -15,7 +15,7 @@ import {
 } from '@/src/lib/queries/admin-faqs'
 
 export const metadata = {
-  title: 'FAQs | Security Reference Portal',
+  title: 'FAQs',
 }
 
 export default async function AdminFaqsPage() {

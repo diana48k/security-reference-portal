@@ -9,7 +9,9 @@ import {
   ShieldCheck,
 } from 'lucide-react'
 
+import { BrandLogo } from '@/src/components/brand-logo'
 import { CaseCard } from '@/src/components/case-card'
+import { SiteFooter } from '@/src/components/site-footer'
 import { getHomePageData } from '@/src/lib/queries/home'
 
 const iconMap: Record<string, ElementType> = {
@@ -29,8 +31,8 @@ export default async function HomePage() {
       <section className="border-b border-slate-200 bg-slate-950 text-white">
         <div className="mx-auto max-w-7xl px-6 py-16 lg:px-8 lg:py-24">
           <div className="max-w-4xl">
-            <div className="mb-6 inline-flex rounded-full border border-white/10 bg-white/10 px-4 py-2 text-sm text-slate-200">
-              Sales & Installation Reference Portal
+            <div className="mb-8">
+              <BrandLogo tone="light" />
             </div>
 
             <h1 className="text-4xl font-bold tracking-tight lg:text-6xl">
@@ -226,6 +228,8 @@ export default async function HomePage() {
           </div>
         </section>
       ) : null}
+
+      <SiteFooter />
     </main>
   )
 }

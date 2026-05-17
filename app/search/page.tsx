@@ -3,6 +3,7 @@ import { ArrowLeft, Search } from 'lucide-react'
 
 import { CaseCard } from '@/src/components/case-card'
 import { SearchFilterForm } from '@/src/components/search-filter-form'
+import { SiteFooter } from '@/src/components/site-footer'
 import {
   getSearchPageData,
   type SearchParamsInput,
@@ -13,7 +14,7 @@ type SearchPageProps = {
 }
 
 export const metadata = {
-  title: 'Search Cases | Security Reference Portal',
+  title: 'Search Cases',
   description: 'ค้นหาและกรองเคสงานติดตั้งจาก Supabase',
 }
 
@@ -90,6 +91,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
           </div>
         )}
       </section>
+      <SiteFooter />
     </main>
   )
 }

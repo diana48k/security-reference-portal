@@ -10,11 +10,24 @@ type PresentationActionsProps = {
 export function PresentationActions({ title }: PresentationActionsProps) {
   const [copied, setCopied] = useState(false)
   const [hideBudget, setHideBudget] = useState(false)
+  const [copyError, setCopyError] = useState<string | null>(null)
 
   async function copyLink() {
-    await navigator.clipboard.writeText(window.location.href)
-    setCopied(true)
-    window.setTimeout(() => setCopied(false), 1800)
+    setCopyError(null)
+
+    try {
+      if (!navigator.clipboard) {
+        throw new Error('Clipboard is not available.')
+      }
+
+      await navigator.clipboard.writeText(window.location.href)
+      setCopied(true)
+      window.setTimeout(() => setCopied(false), 1800)
+    } catch {
+      setCopyError(
+        'Could not copy the link. Please copy the URL from the address bar.',
+      )
+    }
   }
 
   function downloadPdf() {
@@ -53,9 +66,21 @@ export function PresentationActions({ title }: PresentationActionsProps) {
         onClick={toggleBudget}
         className="inline-flex h-10 items-center gap-2 rounded-xl bg-white px-3 text-sm font-semibold text-slate-950 transition hover:bg-slate-200"
       >
-        {hideBudget ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+        {hideBudget ? (
+          <Eye className="h-4 w-4" />
+        ) : (
+          <EyeOff className="h-4 w-4" />
+        )}
         {hideBudget ? 'Show Budget' : 'Hide Budget'}
       </button>
+      {copyError ? (
+        <p
+          className="basis-full text-right text-sm font-semibold text-red-300"
+          role="status"
+        >
+          {copyError}
+        </p>
+      ) : null}
     </div>
   )
 }

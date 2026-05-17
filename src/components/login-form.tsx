@@ -27,15 +27,17 @@ export function LoginForm() {
     const password = String(formData.get('password') ?? '')
 
     const supabase = createClient()
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
+    const { error } = await supabase.auth
+      .signInWithPassword({
+        email,
+        password,
+      })
+      .catch((error: Error) => ({ error }))
 
     setIsSubmitting(false)
 
     if (error) {
-      setErrorMessage(error.message)
+      setErrorMessage(error.message || 'Could not sign in. Please try again.')
       return
     }
 
@@ -46,10 +48,7 @@ export function LoginForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <div>
-        <label
-          htmlFor="email"
-          className="text-sm font-semibold text-slate-700"
-        >
+        <label htmlFor="email" className="text-sm font-semibold text-slate-700">
           อีเมล
         </label>
         <div className="mt-2 flex items-center gap-3 rounded-xl border border-slate-300 bg-white px-4 focus-within:border-slate-950">

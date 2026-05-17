@@ -65,7 +65,15 @@ function hasDocumentUrl(document: CaseDetailDocument) {
   return Boolean(getCaseDocumentUrl(document))
 }
 
-function GalleryPanel({ image, title, label }: { image?: CaseDetailImage; title: string; label: string }) {
+function GalleryPanel({
+  image,
+  title,
+  label,
+}: {
+  image?: CaseDetailImage
+  title: string
+  label: string
+}) {
   const imageUrl = image ? getCaseImageUrl(image) : null
   const altText = image?.alt_text ?? image?.caption ?? title
 
@@ -186,6 +194,7 @@ function DocumentsList({ documents }: { documents: CaseDetailDocument[] }) {
 export function CaseDetailWorkspace({ caseDetail }: CaseDetailWorkspaceProps) {
   const [activeTab, setActiveTab] = useState<TabId>('detail')
   const [copied, setCopied] = useState(false)
+  const [copyError, setCopyError] = useState<string | null>(null)
 
   const beforeImages = useMemo(
     () => getImagesByKind(caseDetail.case_images, 'before'),
@@ -200,7 +209,10 @@ export function CaseDetailWorkspace({ caseDetail }: CaseDetailWorkspaceProps) {
     [caseDetail.case_images],
   )
   const galleryImages = useMemo(
-    () => sortBySortOrder(caseDetail.case_images).filter((image) => getCaseImageUrl(image)),
+    () =>
+      sortBySortOrder(caseDetail.case_images).filter((image) =>
+        getCaseImageUrl(image),
+      ),
     [caseDetail.case_images],
   )
 
@@ -213,13 +225,29 @@ export function CaseDetailWorkspace({ caseDetail }: CaseDetailWorkspaceProps) {
   ].filter((item): item is CaseLookup => Boolean(item))
 
   async function copyLink() {
-    await navigator.clipboard.writeText(window.location.href)
-    setCopied(true)
-    window.setTimeout(() => setCopied(false), 1800)
+    setCopyError(null)
+
+    try {
+      if (!navigator.clipboard) {
+        throw new Error('Clipboard is not available.')
+      }
+
+      await navigator.clipboard.writeText(window.location.href)
+      setCopied(true)
+      window.setTimeout(() => setCopied(false), 1800)
+    } catch {
+      setCopyError(
+        'Could not copy the link. Please copy the URL from the address bar.',
+      )
+    }
   }
 
   function shareToCustomer() {
-    window.open(`/cases/${caseDetail.slug}/present`, '_blank', 'noopener,noreferrer')
+    window.open(
+      `/cases/${caseDetail.slug}/present`,
+      '_blank',
+      'noopener,noreferrer',
+    )
   }
 
   return (
@@ -245,7 +273,9 @@ export function CaseDetailWorkspace({ caseDetail }: CaseDetailWorkspaceProps) {
             </>
           ) : null}
           <ChevronRight className="h-4 w-4" />
-          <span className="font-semibold text-slate-950">{caseDetail.title}</span>
+          <span className="font-semibold text-slate-950">
+            {caseDetail.title}
+          </span>
         </div>
 
         <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
@@ -284,11 +314,17 @@ export function CaseDetailWorkspace({ caseDetail }: CaseDetailWorkspaceProps) {
               ) : null}
               <span className="inline-flex items-center gap-2">
                 <Users className="h-4 w-4 text-slate-400" />
-                ผู้ใช้งาน: {caseDetail.user_count ? `${caseDetail.user_count.toLocaleString('th-TH')} คน` : 'ไม่ระบุ'}
+                ผู้ใช้งาน:{' '}
+                {caseDetail.user_count
+                  ? `${caseDetail.user_count.toLocaleString('th-TH')} คน`
+                  : 'ไม่ระบุ'}
               </span>
               <span className="inline-flex items-center gap-2">
                 <Clock className="h-4 w-4 text-slate-400" />
-                ระยะเวลาดำเนินการ: {caseDetail.installation_days ? `${caseDetail.installation_days} วัน` : 'ไม่ระบุ'}
+                ระยะเวลาดำเนินการ:{' '}
+                {caseDetail.installation_days
+                  ? `${caseDetail.installation_days} วัน`
+                  : 'ไม่ระบุ'}
               </span>
               <span className="inline-flex items-center gap-2">
                 <CalendarDays className="h-4 w-4 text-slate-400" />
@@ -321,6 +357,14 @@ export function CaseDetailWorkspace({ caseDetail }: CaseDetailWorkspaceProps) {
               <Download className="h-4 w-4" />
               ดาวน์โหลดสรุป (PDF)
             </button>
+            {copyError ? (
+              <p
+                className="basis-full text-sm font-semibold text-red-600"
+                role="status"
+              >
+                {copyError}
+              </p>
+            ) : null}
           </div>
         </div>
       </section>
@@ -365,7 +409,9 @@ export function CaseDetailWorkspace({ caseDetail }: CaseDetailWorkspaceProps) {
               {galleryImages.length > 5 ? (
                 <div className="flex h-20 w-32 shrink-0 flex-col items-center justify-center rounded-xl border border-slate-200 bg-white text-sm font-bold text-slate-700">
                   +{galleryImages.length - 5}
-                  <span className="text-xs font-medium text-slate-500">รูปทั้งหมด</span>
+                  <span className="text-xs font-medium text-slate-500">
+                    รูปทั้งหมด
+                  </span>
                 </div>
               ) : null}
             </div>
@@ -468,13 +514,20 @@ export function CaseDetailWorkspace({ caseDetail }: CaseDetailWorkspaceProps) {
                         key={faq.id}
                         className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
                       >
-                        <div className="font-bold text-slate-950">{faq.question}</div>
-                        <p className="mt-2 leading-7 text-slate-600">{faq.answer}</p>
+                        <div className="font-bold text-slate-950">
+                          {faq.question}
+                        </div>
+                        <p className="mt-2 leading-7 text-slate-600">
+                          {faq.answer}
+                        </p>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <EmptyBlock title="ยังไม่มี FAQ" text="เพิ่มคำถามจากหน้า Admin FAQ ได้" />
+                  <EmptyBlock
+                    title="ยังไม่มี FAQ"
+                    text="เพิ่มคำถามจากหน้า Admin FAQ ได้"
+                  />
                 )
               ) : null}
 
@@ -498,7 +551,9 @@ export function CaseDetailWorkspace({ caseDetail }: CaseDetailWorkspaceProps) {
           </section>
 
           <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white px-5 py-4 text-sm text-slate-600 shadow-sm">
-            <div className="font-semibold text-slate-700">เคสนี้มีประโยชน์กับคุณหรือไม่?</div>
+            <div className="font-semibold text-slate-700">
+              เคสนี้มีประโยชน์กับคุณหรือไม่?
+            </div>
             <div className="flex flex-wrap gap-3">
               <button type="button" className="font-bold text-emerald-700">
                 มีประโยชน์
@@ -525,13 +580,28 @@ export function CaseDetailWorkspace({ caseDetail }: CaseDetailWorkspaceProps) {
                 ['ระบบที่ติดตั้ง', caseDetail.system_types?.name_th],
                 ['รูปแบบการเข้าออก', caseDetail.door_types?.name_th],
                 ['ประเภทหน้างาน', caseDetail.site_types?.name_th],
-                ['จำนวนผู้ใช้งาน', caseDetail.user_count ? `${caseDetail.user_count.toLocaleString('th-TH')} คน` : null],
-                ['งบประมาณ', formatBudget(caseDetail.budget_min, caseDetail.budget_max)],
-                ['ระยะเวลาติดตั้ง', caseDetail.installation_days ? `${caseDetail.installation_days} วัน` : null],
+                [
+                  'จำนวนผู้ใช้งาน',
+                  caseDetail.user_count
+                    ? `${caseDetail.user_count.toLocaleString('th-TH')} คน`
+                    : null,
+                ],
+                [
+                  'งบประมาณ',
+                  formatBudget(caseDetail.budget_min, caseDetail.budget_max),
+                ],
+                [
+                  'ระยะเวลาติดตั้ง',
+                  caseDetail.installation_days
+                    ? `${caseDetail.installation_days} วัน`
+                    : null,
+                ],
               ].map(([label, value]) => (
                 <div key={label} className="grid grid-cols-[130px_1fr] gap-3">
                   <dt className="text-slate-500">{label}</dt>
-                  <dd className="font-semibold text-slate-800">{value ?? 'ไม่ระบุ'}</dd>
+                  <dd className="font-semibold text-slate-800">
+                    {value ?? 'ไม่ระบุ'}
+                  </dd>
                 </div>
               ))}
             </dl>
@@ -548,7 +618,12 @@ export function CaseDetailWorkspace({ caseDetail }: CaseDetailWorkspaceProps) {
           <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
             <h2 className="font-bold text-slate-950">เหมาะกับหน้างานประเภท</h2>
             <div className="mt-4 grid grid-cols-2 gap-3">
-              {[caseDetail.site_types, caseDetail.categories, caseDetail.door_types, caseDetail.system_types]
+              {[
+                caseDetail.site_types,
+                caseDetail.categories,
+                caseDetail.door_types,
+                caseDetail.system_types,
+              ]
                 .filter((item): item is CaseLookup => Boolean(item))
                 .map((item) => (
                   <div

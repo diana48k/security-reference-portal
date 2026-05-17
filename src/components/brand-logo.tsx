@@ -14,7 +14,7 @@ export function BrandLogo({
 
   return (
     <div className="flex items-center gap-3">
-      <div className="relative h-10 w-36 overflow-hidden rounded bg-white">
+      <div className="relative h-11 w-11 shrink-0 rounded-xl bg-white p-2 ring-1 ring-slate-200/70">
         <Image
           src="/brand/tigersoft-logo.png"
           alt="Tigersoft"

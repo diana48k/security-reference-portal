@@ -118,7 +118,9 @@ function InfoList({
   title: string
   items: Array<string | null | undefined>
 }) {
-  const visibleItems = items.filter((item): item is string => Boolean(item))
+  const visibleItems = Array.from(
+    new Set(items.filter((item): item is string => Boolean(item))),
+  )
 
   if (visibleItems.length === 0) {
     return <EmptyBlock title={title} text="ยังไม่มีข้อมูลในหัวข้อนี้" />
@@ -128,8 +130,8 @@ function InfoList({
     <div>
       <h3 className="font-bold text-slate-950">{title}</h3>
       <ul className="mt-3 space-y-2 text-sm leading-6 text-slate-600">
-        {visibleItems.map((item) => (
-          <li key={item} className="flex gap-2">
+        {visibleItems.map((item, index) => (
+          <li key={`${index}-${item}`} className="flex gap-2">
             <CheckCircle2 className="mt-1 h-4 w-4 shrink-0 text-emerald-600" />
             <span>{item}</span>
           </li>
@@ -191,6 +193,20 @@ function DocumentsList({ documents }: { documents: CaseDetailDocument[] }) {
   )
 }
 
+function dedupeLookups(items: Array<CaseLookup | null | undefined>) {
+  const seen = new Set<string>()
+
+  return items.filter((item): item is CaseLookup => {
+    if (!item) return false
+
+    const key = `${item.slug}-${item.name_th}`
+    if (seen.has(key)) return false
+
+    seen.add(key)
+    return true
+  })
+}
+
 export function CaseDetailWorkspace({ caseDetail }: CaseDetailWorkspaceProps) {
   const [activeTab, setActiveTab] = useState<TabId>('detail')
   const [copied, setCopied] = useState(false)
@@ -216,13 +232,20 @@ export function CaseDetailWorkspace({ caseDetail }: CaseDetailWorkspaceProps) {
     [caseDetail.case_images],
   )
 
-  const lookups = [
+  const lookups = dedupeLookups([
     caseDetail.categories,
     caseDetail.door_types,
     caseDetail.system_types,
     caseDetail.site_types,
     ...caseDetail.tags,
-  ].filter((item): item is CaseLookup => Boolean(item))
+  ])
+
+  const suitableLookups = dedupeLookups([
+    caseDetail.site_types,
+    caseDetail.categories,
+    caseDetail.door_types,
+    caseDetail.system_types,
+  ])
 
   async function copyLink() {
     setCopyError(null)
@@ -618,22 +641,15 @@ export function CaseDetailWorkspace({ caseDetail }: CaseDetailWorkspaceProps) {
           <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
             <h2 className="font-bold text-slate-950">เหมาะกับหน้างานประเภท</h2>
             <div className="mt-4 grid grid-cols-2 gap-3">
-              {[
-                caseDetail.site_types,
-                caseDetail.categories,
-                caseDetail.door_types,
-                caseDetail.system_types,
-              ]
-                .filter((item): item is CaseLookup => Boolean(item))
-                .map((item) => (
-                  <div
-                    key={item.slug}
-                    className="rounded-2xl border border-slate-200 bg-slate-50 p-3 text-center text-xs font-semibold text-slate-700"
-                  >
-                    <Tags className="mx-auto mb-2 h-5 w-5 text-blue-700" />
-                    {item.name_th}
-                  </div>
-                ))}
+              {suitableLookups.map((item) => (
+                <div
+                  key={`${item.slug}-${item.name_th}`}
+                  className="rounded-2xl border border-slate-200 bg-slate-50 p-3 text-center text-xs font-semibold text-slate-700"
+                >
+                  <Tags className="mx-auto mb-2 h-5 w-5 text-blue-700" />
+                  {item.name_th}
+                </div>
+              ))}
             </div>
           </section>
 

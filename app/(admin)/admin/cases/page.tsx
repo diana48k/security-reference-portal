@@ -12,10 +12,10 @@ export default async function AdminCasesPage() {
       <section className="flex flex-col justify-between gap-4 rounded-[2rem] bg-slate-950 p-8 text-white shadow-sm lg:flex-row lg:items-end">
         <div>
           <p className="text-sm font-semibold uppercase tracking-wide text-slate-400">
-            Case Studies
+            จัดการเคส
           </p>
 
-          <h1 className="mt-3 text-3xl font-bold tracking-tight">
+          <h1 className="mt-3 text-2xl font-bold tracking-tight">
             จัดการเคสงานติดตั้ง
           </h1>
 
@@ -54,8 +54,8 @@ export default async function AdminCasesPage() {
                   <th className="px-6 py-4 font-semibold">ประตู/ระบบ</th>
                   <th className="px-6 py-4 font-semibold">งบประมาณ</th>
                   <th className="px-6 py-4 font-semibold">สถานะ</th>
-                  <th className="px-6 py-4 font-semibold">Quality checklist</th>
-                  <th className="px-6 py-4 font-semibold">Action</th>
+                  <th className="px-6 py-4 font-semibold">รายการตรวจคุณภาพ</th>
+                  <th className="px-6 py-4 font-semibold">การทำงาน</th>
                 </tr>
               </thead>
 
@@ -107,7 +107,7 @@ export default async function AdminCasesPage() {
 
                       {caseStudy.is_featured ? (
                         <div className="mt-2 inline-flex rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700">
-                          Featured
+                          เคสแนะนำ
                         </div>
                       ) : null}
                     </td>
@@ -133,7 +133,7 @@ export default async function AdminCasesPage() {
                           href={`/admin/cases/${caseStudy.id}`}
                           className="inline-flex rounded-xl bg-slate-950 px-3 py-2 text-xs font-semibold text-white transition hover:bg-slate-800"
                         >
-                          แก้ไข
+                          แก้ไขข้อมูล
                         </Link>
                       </div>
                     </td>
@@ -176,12 +176,12 @@ function getQualityIssues(caseStudy: AdminCase) {
   )
 
   return [
-    !hasBeforeImage ? 'ไม่มี Before image' : null,
-    !hasAfterImage ? 'ไม่มี After image' : null,
+    !hasBeforeImage ? 'ไม่มีรูปก่อนติดตั้ง' : null,
+    !hasAfterImage ? 'ไม่มีรูปหลังติดตั้ง' : null,
     !hasPdf ? 'ไม่มี PDF' : null,
-    !caseStudy.customer_visible_notes ? 'ไม่มี Customer Visible Notes' : null,
-    caseStudy.status === 'draft' ? 'ยังเป็น Draft' : null,
-    !caseStudy.sales_notes ? 'ไม่มี Sales Notes' : null,
+    !caseStudy.customer_visible_notes ? 'ไม่มีหมายเหตุที่แสดงให้ลูกค้าเห็น' : null,
+    caseStudy.status === 'draft' ? 'ยังเป็นฉบับร่าง' : null,
+    !caseStudy.sales_notes ? 'ไม่มีบันทึกสำหรับทีมขาย' : null,
   ].filter((issue): issue is string => Boolean(issue))
 }
 
@@ -229,7 +229,13 @@ function StatusBadge({ status }: { status: string }) {
       className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${styleMap[status] ?? 'bg-slate-100 text-slate-700'
         }`}
     >
-      {status}
+      {status === 'published'
+        ? 'เผยแพร่แล้ว'
+        : status === 'draft'
+          ? 'ฉบับร่าง'
+          : status === 'archived'
+            ? 'เก็บถาวร'
+            : status}
     </span>
   )
 }

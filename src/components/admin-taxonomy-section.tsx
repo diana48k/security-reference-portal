@@ -26,7 +26,7 @@ export function AdminTaxonomySection({ section }: AdminTaxonomySectionProps) {
           <p className="mt-1 text-sm text-slate-600">{section.description}</p>
         </div>
         <div className="text-sm font-semibold text-slate-500">
-          {section.items.length.toLocaleString('en-US')} items
+          {section.items.length.toLocaleString('th-TH')} รายการ
         </div>
       </div>
 
@@ -35,16 +35,16 @@ export function AdminTaxonomySection({ section }: AdminTaxonomySectionProps) {
         className="mt-6 grid gap-3 rounded-2xl bg-slate-50 p-4 lg:grid-cols-6"
       >
         <input type="hidden" name="table" value={section.table} />
-        <Input name="name_th" label="Name TH" required />
-        <Input name="name_en" label="Name EN" />
+        <Input name="name_th" label="ชื่อภาษาไทย" required />
+        <Input name="name_en" label="ชื่อภาษาอังกฤษ" />
         <Input name="slug" label="Slug" />
         {section.supportsSortOrder ? (
-          <Input name="sort_order" label="Sort" type="number" defaultValue="0" />
+          <Input name="sort_order" label="ลำดับ" type="number" defaultValue="0" />
         ) : null}
         {section.supportsCategoryFields ? (
           <>
-            <Input name="icon" label="Icon" />
-            <Input name="description" label="Description" />
+            <Input name="icon" label="ไอคอน" />
+            <Input name="description" label="คำอธิบาย" />
           </>
         ) : null}
         <label className="flex items-end gap-2 pb-3 text-sm font-semibold text-slate-700">
@@ -54,14 +54,14 @@ export function AdminTaxonomySection({ section }: AdminTaxonomySectionProps) {
             defaultChecked
             className="h-4 w-4"
           />
-          Active
+          เปิดใช้งาน
         </label>
         <div className="flex items-end">
           <SubmitButton
-            pendingText="Adding..."
+            pendingText="กำลังเพิ่ม..."
             className="h-11 rounded-xl bg-slate-950 px-5 text-sm font-semibold text-white transition hover:bg-slate-800"
           >
-            Add
+            เพิ่ม
           </SubmitButton>
         </div>
       </form>
@@ -94,23 +94,23 @@ function TaxonomyItemForm({
       >
         <input type="hidden" name="table" value={section.table} />
         <input type="hidden" name="id" value={item.id} />
-        <Input name="name_th" label="Name TH" defaultValue={item.name_th} required />
-        <Input name="name_en" label="Name EN" defaultValue={item.name_en ?? ''} />
+        <Input name="name_th" label="ชื่อภาษาไทย" defaultValue={item.name_th} required />
+        <Input name="name_en" label="ชื่อภาษาอังกฤษ" defaultValue={item.name_en ?? ''} />
         <Input name="slug" label="Slug" defaultValue={item.slug} required />
         {section.supportsSortOrder ? (
           <Input
             name="sort_order"
-            label="Sort"
+            label="ลำดับ"
             type="number"
             defaultValue={String(item.sort_order ?? 0)}
           />
         ) : null}
         {section.supportsCategoryFields ? (
           <>
-            <Input name="icon" label="Icon" defaultValue={item.icon ?? ''} />
+            <Input name="icon" label="ไอคอน" defaultValue={item.icon ?? ''} />
             <Input
               name="description"
-              label="Description"
+              label="คำอธิบาย"
               defaultValue={item.description ?? ''}
             />
           </>
@@ -122,14 +122,14 @@ function TaxonomyItemForm({
             defaultChecked={item.is_active}
             className="h-4 w-4"
           />
-          Active
+          เปิดใช้งาน
         </label>
         <div className="flex items-end gap-2">
           <SubmitButton
-            pendingText="Saving..."
+            pendingText="กำลังบันทึก..."
             className="h-11 rounded-xl bg-slate-950 px-4 text-sm font-semibold text-white transition hover:bg-slate-800"
           >
-            Save
+            บันทึก
           </SubmitButton>
         </div>
       </form>
@@ -145,10 +145,10 @@ function TaxonomyItemForm({
         <ConfirmActionButton
           confirmMessage={
             item.is_active
-              ? `Deactivate "${item.name_th}"? It will disappear from public filters and case forms.`
-              : `Activate "${item.name_th}"? It will be available in public filters and case forms.`
+              ? `ปิดใช้งาน "${item.name_th}" หรือไม่? รายการนี้จะไม่แสดงในตัวกรองและฟอร์มเคส`
+              : `เปิดใช้งาน "${item.name_th}" หรือไม่? รายการนี้จะกลับมาใช้ในตัวกรองและฟอร์มเคส`
           }
-          pendingText={item.is_active ? 'Deactivating...' : 'Activating...'}
+          pendingText={item.is_active ? 'กำลังปิดใช้งาน...' : 'กำลังเปิดใช้งาน...'}
           className={
             item.is_active
               ? 'inline-flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-700 transition hover:bg-amber-100'
@@ -160,7 +160,7 @@ function TaxonomyItemForm({
           ) : (
             <Eye className="h-4 w-4" />
           )}
-          {item.is_active ? 'Deactivate' : 'Activate'}
+          {item.is_active ? 'ปิดใช้งาน' : 'เปิดใช้งาน'}
         </ConfirmActionButton>
       </form>
     </div>

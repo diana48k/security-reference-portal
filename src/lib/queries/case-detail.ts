@@ -56,6 +56,7 @@ export type CaseDetail = {
   requirement_summary: string | null
   solution_statement: string | null
   installation_notes: string | null
+  sales_notes: string | null
   customer_visible_notes: string | null
   published_at: string | null
   categories: CaseLookup | null
@@ -109,6 +110,7 @@ const CASE_DETAIL_SELECT = `
   requirement_summary,
   solution_statement,
   installation_notes,
+  sales_notes,
   customer_visible_notes,
   published_at,
   categories (

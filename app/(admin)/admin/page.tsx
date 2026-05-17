@@ -13,27 +13,27 @@ import { getAdminDashboardStats } from '@/src/lib/queries/admin'
 const statLabels = [
   {
     key: 'totalCases',
-    label: 'Total cases',
+    label: 'เคสทั้งหมด',
     icon: FolderKanban,
   },
   {
     key: 'publishedCases',
-    label: 'Published',
+    label: 'เผยแพร่แล้ว',
     icon: FileText,
   },
   {
     key: 'draftCases',
-    label: 'Drafts',
+    label: 'ฉบับร่าง',
     icon: FileText,
   },
   {
     key: 'categories',
-    label: 'Categories',
+    label: 'หมวดระบบ',
     icon: Tags,
   },
   {
     key: 'faqs',
-    label: 'FAQs',
+    label: 'คำถาม FAQ',
     icon: HelpCircle,
   },
 ] as const
@@ -41,28 +41,28 @@ const statLabels = [
 const quickLinks = [
   {
     href: '/admin/cases/new',
-    label: 'Create new case',
+    label: 'เพิ่มเคสใหม่',
     icon: Plus,
   },
   {
     href: '/admin/cases',
-    label: 'Manage cases',
+    label: 'จัดการเคส',
     icon: FolderKanban,
   },
   {
     href: '/admin/taxonomy',
-    label: 'Manage taxonomy',
+    label: 'จัดการหมวดระบบ',
     icon: Tags,
   },
   {
     href: '/admin/faqs',
-    label: 'Manage FAQs',
+    label: 'จัดการ FAQ',
     icon: HelpCircle,
   },
 ]
 
 export const metadata = {
-  title: 'Admin Dashboard',
+  title: 'แดชบอร์ดผู้ดูแล',
 }
 
 export default async function AdminDashboardPage() {
@@ -72,13 +72,13 @@ export default async function AdminDashboardPage() {
     <div className="space-y-8">
       <section>
         <p className="text-sm font-semibold uppercase tracking-wide text-slate-500">
-          Admin
+          ผู้ดูแลระบบ
         </p>
-        <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-950">
-          Dashboard
+        <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-950">
+          แดชบอร์ด
         </h1>
         <p className="mt-3 max-w-2xl text-slate-600">
-          Overview for case studies, taxonomy, and sales support content.
+          ภาพรวมข้อมูลเคส หมวดระบบ และเนื้อหาสนับสนุนทีมขาย
         </p>
       </section>
 
@@ -95,7 +95,7 @@ export default async function AdminDashboardPage() {
                 <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-950 text-white">
                   <Icon className="h-5 w-5" />
                 </div>
-                <div className="text-3xl font-bold text-slate-950">
+                <div className="text-2xl font-bold text-slate-950">
                   {stats[item.key].toLocaleString('en-US')}
                 </div>
               </div>
@@ -108,7 +108,7 @@ export default async function AdminDashboardPage() {
       </section>
 
       <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-xl font-bold text-slate-950">Quick actions</h2>
+        <h2 className="text-xl font-bold text-slate-950">เมนูลัด</h2>
         <div className="mt-5 grid gap-3 md:grid-cols-2">
           {quickLinks.map((item) => {
             const Icon = item.icon

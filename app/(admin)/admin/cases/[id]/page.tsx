@@ -40,16 +40,16 @@ export default async function AdminEditCasePage({
           className="mb-6 inline-flex items-center gap-2 text-sm font-medium text-slate-300 transition hover:text-white"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back to cases
+          กลับรายการเคส
         </Link>
 
         <p className="text-sm font-semibold uppercase tracking-wide text-slate-400">
-          Edit case study
+          แก้ไขเคสงานติดตั้ง
         </p>
 
         <div className="mt-3 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">
+            <h1 className="text-2xl font-bold tracking-tight">
               {caseStudy.title}
             </h1>
             <p className="mt-3 max-w-2xl text-slate-300">
@@ -64,7 +64,7 @@ export default async function AdminEditCasePage({
               className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-slate-200"
             >
               <ExternalLink className="h-4 w-4" />
-              View public page
+              ดูหน้าเคส
             </Link>
           ) : null}
         </div>

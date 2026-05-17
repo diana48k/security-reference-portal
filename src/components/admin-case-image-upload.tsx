@@ -16,10 +16,10 @@ type AdminCaseImageUploadProps = {
 }
 
 const imageKinds = [
-  { value: 'before', label: 'Before' },
-  { value: 'after', label: 'After' },
-  { value: 'gallery', label: 'Gallery' },
-  { value: 'diagram', label: 'Diagram' },
+  { value: 'before', label: 'ก่อนติดตั้ง' },
+  { value: 'after', label: 'หลังติดตั้ง' },
+  { value: 'gallery', label: 'แกลเลอรี' },
+  { value: 'diagram', label: 'แผนผัง / ไดอะแกรม' },
 ]
 
 export function AdminCaseImageUpload({
@@ -33,9 +33,9 @@ export function AdminCaseImageUpload({
           <ImageIcon className="h-5 w-5" />
         </div>
         <div>
-          <h2 className="text-xl font-bold text-slate-950">Images</h2>
+          <h2 className="text-xl font-bold text-slate-950">รูปภาพ</h2>
           <p className="text-sm text-slate-600">
-            Upload Before, After, Gallery, or Diagram images.
+            อัปโหลดรูปก่อนติดตั้ง หลังติดตั้ง แกลเลอรี หรือไดอะแกรม
           </p>
         </div>
       </div>
@@ -46,7 +46,7 @@ export function AdminCaseImageUpload({
       >
         <input type="hidden" name="case_id" value={caseId} />
 
-        <Field label="Image file">
+        <Field label="ไฟล์รูปภาพ">
           <input
             type="file"
             name="file"
@@ -56,7 +56,7 @@ export function AdminCaseImageUpload({
           />
         </Field>
 
-        <Field label="Kind">
+        <Field label="ประเภทรูป">
           <select
             name="kind"
             defaultValue="gallery"
@@ -70,23 +70,23 @@ export function AdminCaseImageUpload({
           </select>
         </Field>
 
-        <Field label="Caption">
+        <Field label="คำบรรยาย">
           <input
             name="caption"
-            placeholder="Optional caption"
+            placeholder="คำบรรยายเพิ่มเติม"
             className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-950"
           />
         </Field>
 
-        <Field label="Alt text">
+        <Field label="คำอธิบายรูป">
           <input
             name="alt_text"
-            placeholder="Optional image description"
+            placeholder="คำอธิบายรูปเพิ่มเติม"
             className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-950"
           />
         </Field>
 
-        <Field label="Sort order">
+        <Field label="ลำดับการแสดงผล">
           <input
             name="sort_order"
             type="number"
@@ -97,10 +97,10 @@ export function AdminCaseImageUpload({
 
         <div className="flex items-end">
           <SubmitButton
-            pendingText="Uploading..."
+            pendingText="กำลังอัปโหลด..."
             className="h-11 rounded-xl bg-slate-950 px-5 text-sm font-semibold text-white transition hover:bg-slate-800"
           >
-            Upload image
+            อัปโหลดรูปภาพ
           </SubmitButton>
         </div>
       </form>
@@ -127,7 +127,7 @@ export function AdminCaseImageUpload({
                   </div>
                 ) : (
                   <div className="flex aspect-[16/10] items-center justify-center bg-slate-100 text-sm text-slate-500">
-                    Missing image URL
+                    ไม่พบ URL รูปภาพ
                   </div>
                 )}
 
@@ -137,19 +137,19 @@ export function AdminCaseImageUpload({
                       {image.kind}
                     </div>
                     <h3 className="mt-1 font-semibold text-slate-950">
-                      {image.caption ?? image.storage_path ?? 'Untitled image'}
+                      {image.caption ?? image.storage_path ?? 'ยังไม่มีชื่อรูป'}
                     </h3>
                   </div>
 
                   <form action={deleteCaseImageAction}>
                     <input type="hidden" name="image_id" value={image.id} />
                     <ConfirmActionButton
-                      confirmMessage={`Delete image "${image.caption ?? image.storage_path ?? image.id}"?`}
-                      pendingText="Deleting..."
+                      confirmMessage={`ลบรูป "${image.caption ?? image.storage_path ?? image.id}" หรือไม่?`}
+                      pendingText="กำลังลบ..."
                       className="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 transition hover:bg-red-100"
                     >
                       <Trash2 className="h-4 w-4" />
-                      Delete image
+                      ลบรูปภาพ
                     </ConfirmActionButton>
                   </form>
                 </div>
@@ -159,7 +159,7 @@ export function AdminCaseImageUpload({
         </div>
       ) : (
         <div className="mt-6 rounded-2xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500">
-          No images uploaded yet.
+          ยังไม่มีรูปภาพที่อัปโหลด
         </div>
       )}
     </section>

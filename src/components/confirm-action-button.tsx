@@ -12,7 +12,7 @@ type ConfirmActionButtonProps = {
 export function ConfirmActionButton({
   children,
   confirmMessage,
-  pendingText = 'Working...',
+  pendingText = 'กำลังดำเนินการ...',
   className,
 }: ConfirmActionButtonProps) {
   const { pending } = useFormStatus()

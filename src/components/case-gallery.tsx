@@ -62,7 +62,7 @@ export function CaseGallery({ images, title }: CaseGalleryProps) {
           {beforeImages.length > 0 ? (
             <section>
               <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">
-                Before
+                ก่อนติดตั้ง
               </h3>
               <div className="grid gap-4">
                 {beforeImages.map((image) => (
@@ -75,7 +75,7 @@ export function CaseGallery({ images, title }: CaseGalleryProps) {
           {afterImages.length > 0 ? (
             <section>
               <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">
-                After
+                หลังติดตั้ง
               </h3>
               <div className="grid gap-4">
                 {afterImages.map((image) => (
@@ -90,7 +90,7 @@ export function CaseGallery({ images, title }: CaseGalleryProps) {
       {otherImages.length > 0 ? (
         <section>
           <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">
-            Gallery
+            แกลเลอรี
           </h3>
           <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
             {otherImages.map((image) => (

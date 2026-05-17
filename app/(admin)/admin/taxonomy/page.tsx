@@ -4,7 +4,7 @@ import { AdminTaxonomySection } from '@/src/components/admin-taxonomy-section'
 import { getAdminTaxonomyPageData } from '@/src/lib/queries/admin-taxonomy'
 
 export const metadata = {
-  title: 'Taxonomy',
+  title: 'จัดการหมวดระบบ',
 }
 
 export default async function AdminTaxonomyPage() {
@@ -19,14 +19,14 @@ export default async function AdminTaxonomyPage() {
           </div>
           <div>
             <p className="text-sm font-semibold uppercase tracking-wide text-slate-400">
-              Admin Taxonomy
+              จัดการหมวดระบบ
             </p>
-            <h1 className="mt-2 text-3xl font-bold tracking-tight">
-              Manage filters and labels
+            <h1 className="mt-2 text-2xl font-bold tracking-tight">
+              จัดการตัวกรองและป้ายกำกับ
             </h1>
             <p className="mt-3 max-w-3xl text-slate-300">
-              Add and maintain categories, site types, door types, system types,
-              and tags used across search and case forms.
+              เพิ่มและแก้ไขหมวดระบบ ประเภทสถานที่ ประเภทประตู ประเภทระบบ
+              และแท็กที่ใช้ในหน้าค้นหาและฟอร์มเคส
             </p>
           </div>
         </div>

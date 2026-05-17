@@ -15,7 +15,7 @@ import {
 } from '@/src/lib/queries/admin-faqs'
 
 export const metadata = {
-  title: 'FAQs',
+  title: 'จัดการ FAQ',
 }
 
 export default async function AdminFaqsPage() {
@@ -30,30 +30,29 @@ export default async function AdminFaqsPage() {
           </div>
           <div>
             <p className="text-sm font-semibold uppercase tracking-wide text-slate-400">
-              Admin FAQ
+              จัดการ FAQ
             </p>
-            <h1 className="mt-2 text-3xl font-bold tracking-tight">
-              Manage FAQs
+            <h1 className="mt-2 text-2xl font-bold tracking-tight">
+              จัดการคำถามที่พบบ่อย
             </h1>
             <p className="mt-3 max-w-3xl text-slate-300">
-              Add global FAQs for the home page or attach FAQs to a specific
-              case detail page.
+              เพิ่ม FAQ สำหรับหน้าหลัก หรือผูกคำถามกับเคสงานติดตั้งเฉพาะรายการ
             </p>
           </div>
         </div>
       </section>
 
       <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-xl font-bold text-slate-950">Add FAQ</h2>
+        <h2 className="text-xl font-bold text-slate-950">เพิ่ม FAQ</h2>
         <FaqForm action={createFaqAction} categories={categories} cases={cases} />
       </section>
 
       <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <div className="flex items-end justify-between gap-4">
           <div>
-            <h2 className="text-xl font-bold text-slate-950">FAQ list</h2>
+            <h2 className="text-xl font-bold text-slate-950">รายการ FAQ</h2>
             <p className="mt-1 text-sm text-slate-600">
-              {faqs.length.toLocaleString('en-US')} FAQs
+              {faqs.length.toLocaleString('th-TH')} รายการ
             </p>
           </div>
         </div>
@@ -70,7 +69,7 @@ export default async function AdminFaqsPage() {
             ))
           ) : (
             <div className="rounded-2xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500">
-              No FAQs yet.
+              ยังไม่มี FAQ
             </div>
           )}
         </div>
@@ -92,11 +91,11 @@ function FaqItem({
     <article className="rounded-2xl border border-slate-200 p-4">
       <div className="mb-4 flex flex-wrap gap-2 text-xs font-semibold">
         <span className="rounded-full bg-slate-100 px-3 py-1 text-slate-700">
-          {faq.is_active ? 'Active' : 'Inactive'}
+          {faq.is_active ? 'เปิดใช้งาน' : 'ปิดใช้งาน'}
         </span>
         {faq.is_global ? (
           <span className="rounded-full bg-emerald-50 px-3 py-1 text-emerald-700">
-            Global
+            แสดงทั่วระบบ
           </span>
         ) : null}
         {faq.categories ? (
@@ -121,12 +120,12 @@ function FaqItem({
       <form action={deleteFaqAction} className="mt-3">
         <input type="hidden" name="id" value={faq.id} />
         <ConfirmActionButton
-          confirmMessage={`Delete FAQ "${faq.question}"?`}
-          pendingText="Deleting..."
+          confirmMessage={`ลบ FAQ "${faq.question}" หรือไม่?`}
+          pendingText="กำลังลบ..."
           className="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 transition hover:bg-red-100"
         >
           <Trash2 className="h-4 w-4" />
-          Delete
+          ลบ
         </ConfirmActionButton>
       </form>
     </article>
@@ -150,7 +149,7 @@ function FaqForm({
 
       <label className="block">
         <span className="mb-2 block text-sm font-semibold text-slate-700">
-          Question
+          คำถาม
         </span>
         <input
           name="question"
@@ -162,7 +161,7 @@ function FaqForm({
 
       <label className="block">
         <span className="mb-2 block text-sm font-semibold text-slate-700">
-          Answer
+          คำตอบ
         </span>
         <textarea
           name="answer"
@@ -175,7 +174,7 @@ function FaqForm({
 
       <div className="grid gap-4 md:grid-cols-3">
         <Select
-          label="Category"
+          label="หมวดระบบ"
           name="category_id"
           value={faq?.category_id ?? ''}
           options={categories.map((category) => ({
@@ -184,7 +183,7 @@ function FaqForm({
           }))}
         />
         <Select
-          label="Case"
+          label="เคส"
           name="case_id"
           value={faq?.case_id ?? ''}
           options={cases.map((caseStudy) => ({
@@ -194,7 +193,7 @@ function FaqForm({
         />
         <label className="block">
           <span className="mb-2 block text-sm font-semibold text-slate-700">
-            Sort
+            ลำดับ
           </span>
           <input
             name="sort_order"
@@ -213,7 +212,7 @@ function FaqForm({
             defaultChecked={faq?.is_global ?? true}
             className="h-4 w-4"
           />
-          Global
+          แสดงทั่วระบบ
         </label>
         <label className="inline-flex items-center gap-2 text-sm font-semibold text-slate-700">
           <input
@@ -222,16 +221,16 @@ function FaqForm({
             defaultChecked={faq?.is_active ?? true}
             className="h-4 w-4"
           />
-          Active
+          เปิดใช้งาน
         </label>
       </div>
 
       <div>
         <SubmitButton
-          pendingText={faq ? 'Saving...' : 'Adding...'}
+          pendingText={faq ? 'กำลังบันทึก...' : 'กำลังเพิ่ม...'}
           className="rounded-xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
         >
-          {faq ? 'Save FAQ' : 'Add FAQ'}
+          {faq ? 'บันทึก FAQ' : 'เพิ่ม FAQ'}
         </SubmitButton>
       </div>
     </form>
@@ -259,7 +258,7 @@ function Select({
         defaultValue={value}
         className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-950 outline-none transition focus:border-slate-400"
       >
-        <option value="">None</option>
+        <option value="">ไม่ระบุ</option>
         {options.map((option) => (
           <option key={option.value} value={option.value}>
             {option.label}

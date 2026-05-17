@@ -43,11 +43,11 @@ export function AdminCaseForm({
       {caseStudy ? <input type="hidden" name="id" value={caseStudy.id} /> : null}
 
       <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-xl font-bold text-slate-950">Case details</h2>
+        <h2 className="text-xl font-bold text-slate-950">ข้อมูลเคส</h2>
 
         <div className="mt-6 grid gap-5 lg:grid-cols-2">
           <InputField
-            label="Case title"
+            label="ชื่อเคส"
             name="title"
             placeholder="Factory access control installation"
             defaultValue={caseStudy?.title}
@@ -55,36 +55,36 @@ export function AdminCaseForm({
           />
 
           <InputField
-            label="Slug URL"
+            label="ชื่อ URL (Slug)"
             name="slug"
             placeholder="factory-access-control-glass-door"
-            helper="Leave blank on create to generate from the title."
+            helper="เว้นว่างได้ ระบบจะสร้างจากชื่อเคสให้อัตโนมัติ"
             defaultValue={caseStudy?.slug}
           />
 
           <InputField
-            label="Subtitle"
+            label="คำอธิบายสั้น"
             name="subtitle"
-            placeholder="Short summary for cards and detail page"
+            placeholder="สรุปสั้นสำหรับการ์ดและหน้ารายละเอียด"
             defaultValue={caseStudy?.subtitle}
           />
 
           <InputField
-            label="Customer / project"
+            label="ลูกค้า / โครงการ"
             name="customer_name"
             placeholder="Example Customer A"
             defaultValue={caseStudy?.customer_name}
           />
 
           <InputField
-            label="Location"
+            label="สถานที่"
             name="location"
             placeholder="Factory, office, carpark, warehouse"
             defaultValue={caseStudy?.location}
           />
 
           <InputField
-            label="Installed date"
+            label="วันที่ติดตั้ง"
             name="installed_at"
             type="date"
             defaultValue={dateValue(caseStudy?.installed_at)}
@@ -93,29 +93,29 @@ export function AdminCaseForm({
       </section>
 
       <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-xl font-bold text-slate-950">Taxonomy</h2>
+        <h2 className="text-xl font-bold text-slate-950">หมวดหมู่และตัวกรอง</h2>
 
         <div className="mt-6 grid gap-5 lg:grid-cols-2">
           <SelectField
-            label="Category"
+            label="หมวดระบบ"
             name="category_id"
             options={categories}
             defaultValue={caseStudy?.category_id}
           />
           <SelectField
-            label="Site type"
+            label="ประเภทสถานที่"
             name="site_type_id"
             options={siteTypes}
             defaultValue={caseStudy?.site_type_id}
           />
           <SelectField
-            label="Door type"
+            label="ประเภทประตู"
             name="door_type_id"
             options={doorTypes}
             defaultValue={caseStudy?.door_type_id}
           />
           <SelectField
-            label="Primary system"
+            label="ระบบหลัก"
             name="primary_system_type_id"
             options={systemTypes}
             defaultValue={caseStudy?.primary_system_type_id}
@@ -124,11 +124,11 @@ export function AdminCaseForm({
       </section>
 
       <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-xl font-bold text-slate-950">Commercial details</h2>
+        <h2 className="text-xl font-bold text-slate-950">ข้อมูลงานขาย</h2>
 
         <div className="mt-6 grid gap-5 lg:grid-cols-2">
           <InputField
-            label="Budget min"
+            label="งบประมาณขั้นต่ำ"
             name="budget_min"
             type="number"
             placeholder="35000"
@@ -136,7 +136,7 @@ export function AdminCaseForm({
           />
 
           <InputField
-            label="Budget max"
+            label="งบประมาณสูงสุด"
             name="budget_max"
             type="number"
             placeholder="65000"
@@ -144,7 +144,7 @@ export function AdminCaseForm({
           />
 
           <InputField
-            label="User count"
+            label="จำนวนผู้ใช้งาน"
             name="user_count"
             type="number"
             placeholder="300"
@@ -152,7 +152,7 @@ export function AdminCaseForm({
           />
 
           <InputField
-            label="Installation days"
+            label="จำนวนวันติดตั้ง"
             name="installation_days"
             type="number"
             placeholder="2"
@@ -162,67 +162,67 @@ export function AdminCaseForm({
       </section>
 
       <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-xl font-bold text-slate-950">Project notes</h2>
+        <h2 className="text-xl font-bold text-slate-950">บันทึกโครงการ</h2>
 
         <div className="mt-6 space-y-5">
           <TextareaField
-            label="Problem statement"
+            label="โจทย์ / ปัญหาของลูกค้า"
             name="problem_statement"
-            placeholder="What problem did the customer need to solve?"
+            placeholder="ลูกค้าต้องการแก้ปัญหาอะไร"
             defaultValue={caseStudy?.problem_statement}
           />
 
           <TextareaField
-            label="Requirement summary"
+            label="สรุปความต้องการ"
             name="requirement_summary"
-            placeholder="Main requirements and constraints"
+            placeholder="ความต้องการหลักและข้อจำกัดของหน้างาน"
             defaultValue={caseStudy?.requirement_summary}
           />
 
           <TextareaField
-            label="Solution statement"
+            label="แนวทางแก้ไข"
             name="solution_statement"
-            placeholder="Installed solution and equipment approach"
+            placeholder="แนวทางติดตั้งและอุปกรณ์ที่ใช้"
             defaultValue={caseStudy?.solution_statement}
           />
 
           <TextareaField
-            label="Installation notes"
+            label="หมายเหตุการติดตั้ง"
             name="installation_notes"
-            placeholder="Site notes, wiring, mounting, survey points"
+            placeholder="หมายเหตุหน้างาน การเดินสาย จุดติดตั้ง หรือจุดสำรวจ"
             defaultValue={caseStudy?.installation_notes}
           />
 
           <TextareaField
-            label="Sales notes"
+            label="บันทึกสำหรับทีมขาย"
             name="sales_notes"
-            placeholder="Internal selling points for the sales team"
+            placeholder="จุดขายหรือข้อควรพูดกับลูกค้า"
             defaultValue={caseStudy?.sales_notes}
           />
 
           <TextareaField
-            label="Tech notes"
+            label="บันทึกสำหรับทีมเทคนิค"
             name="tech_notes"
-            placeholder="Internal notes for technical team"
+            placeholder="หมายเหตุภายในสำหรับทีมเทคนิค"
             defaultValue={caseStudy?.tech_notes}
           />
 
           <TextareaField
-            label="Customer visible notes"
+            label="ข้อความที่แสดงให้ลูกค้าเห็น"
             name="customer_visible_notes"
-            placeholder="Public-facing notes shown on the case page"
+            placeholder="ข้อความสำหรับหน้าเคสหรือใช้พรีเซนต์ลูกค้า"
             defaultValue={caseStudy?.customer_visible_notes}
           />
         </div>
       </section>
 
       <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-xl font-bold text-slate-950">Publishing</h2>
+        <h2 className="text-xl font-bold text-slate-950">การเผยแพร่</h2>
 
         <div className="mt-6 grid gap-5 lg:grid-cols-2">
           <div>
             <label className="mb-2 block text-sm font-semibold text-slate-700">
-              Status
+              สถานะ
             </label>
 
             <select
@@ -230,9 +230,9 @@ export function AdminCaseForm({
               defaultValue={caseStudy?.status ?? 'draft'}
               className="h-12 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 text-slate-950 outline-none"
             >
-              <option value="draft">Draft - hidden from public pages</option>
-              <option value="published">Published - visible publicly</option>
-              <option value="archived">Archived - hidden from public pages</option>
+              <option value="draft">ฉบับร่าง - ซ่อนจากหน้าทีมขาย</option>
+              <option value="published">เผยแพร่แล้ว - แสดงในหน้าทีมขาย</option>
+              <option value="archived">เก็บถาวร - ซ่อนจากหน้าทีมขาย</option>
             </select>
           </div>
 
@@ -244,7 +244,7 @@ export function AdminCaseForm({
               className="h-5 w-5 rounded border-slate-300"
             />
             <span className="text-sm font-semibold text-slate-700">
-              Featured on home page
+              แสดงเป็นเคสแนะนำในหน้าหลัก
             </span>
           </label>
         </div>
@@ -252,17 +252,17 @@ export function AdminCaseForm({
 
       <div className="flex flex-wrap gap-3">
         <SubmitButton
-          pendingText={mode === 'edit' ? 'Saving...' : 'Creating...'}
+          pendingText={mode === 'edit' ? 'กำลังบันทึก...' : 'กำลังสร้าง...'}
           className="rounded-xl bg-slate-950 px-6 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-400"
         >
-          {mode === 'edit' ? 'Save changes' : 'Create case'}
+          {mode === 'edit' ? 'บันทึกการแก้ไข' : 'สร้างเคส'}
         </SubmitButton>
 
         <Link
           href="/admin/cases"
           className="rounded-xl border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-950 transition hover:bg-slate-50"
         >
-          Cancel
+          ยกเลิก
         </Link>
       </div>
     </form>
@@ -328,7 +328,7 @@ function SelectField({
         defaultValue={defaultValue ?? ''}
         className="h-12 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 text-slate-950 outline-none"
       >
-        <option value="">Not specified</option>
+        <option value="">ไม่ระบุ</option>
 
         {options.map((option) => (
           <option key={option.id} value={option.id}>

@@ -20,10 +20,10 @@ export default async function AdminNewCasePage() {
         </Link>
 
         <p className="text-sm font-semibold uppercase tracking-wide text-slate-400">
-          New Case Study
+          เพิ่มเคสใหม่
         </p>
 
-        <h1 className="mt-3 text-3xl font-bold tracking-tight">
+        <h1 className="mt-3 text-2xl font-bold tracking-tight">
           เพิ่มเคสงานติดตั้งใหม่
         </h1>
 

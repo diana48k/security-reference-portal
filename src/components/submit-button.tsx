@@ -10,7 +10,7 @@ type SubmitButtonProps = {
 
 export function SubmitButton({
   children,
-  pendingText = 'Saving...',
+  pendingText = 'กำลังบันทึก...',
   className,
 }: SubmitButtonProps) {
   const { pending } = useFormStatus()

@@ -50,7 +50,7 @@ export function LoginForm() {
           htmlFor="email"
           className="text-sm font-semibold text-slate-700"
         >
-          Email
+          อีเมล
         </label>
         <div className="mt-2 flex items-center gap-3 rounded-xl border border-slate-300 bg-white px-4 focus-within:border-slate-950">
           <Mail className="h-5 w-5 text-slate-400" />
@@ -71,7 +71,7 @@ export function LoginForm() {
           htmlFor="password"
           className="text-sm font-semibold text-slate-700"
         >
-          Password
+          รหัสผ่าน
         </label>
         <div className="mt-2 flex items-center gap-3 rounded-xl border border-slate-300 bg-white px-4 focus-within:border-slate-950">
           <Lock className="h-5 w-5 text-slate-400" />
@@ -82,7 +82,7 @@ export function LoginForm() {
             autoComplete="current-password"
             required
             className="h-12 w-full bg-transparent text-slate-950 outline-none placeholder:text-slate-400"
-            placeholder="Enter password"
+            placeholder="กรอกรหัสผ่าน"
           />
         </div>
       </div>
@@ -99,7 +99,7 @@ export function LoginForm() {
         className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-slate-950 px-5 font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-400"
       >
         <LogIn className="h-5 w-5" />
-        {isSubmitting ? 'Signing in...' : 'Sign in'}
+        {isSubmitting ? 'กำลังเข้าสู่ระบบ...' : 'เข้าสู่ระบบ'}
       </button>
     </form>
   )

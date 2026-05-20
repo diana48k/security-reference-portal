@@ -17,12 +17,12 @@ import {
   MapPin,
   Network,
   Share2,
-  Star,
   Tags,
   Users,
   Wrench,
 } from 'lucide-react'
 
+import { FavoriteCaseButton } from '@/src/components/favorite-case-button'
 import {
   formatBudget,
   formatThaiDate,
@@ -357,13 +357,12 @@ export function CaseDetailWorkspace({ caseDetail }: CaseDetailWorkspaceProps) {
           </div>
 
           <div className="flex flex-wrap gap-3">
-            <button
-              type="button"
-              className="inline-flex h-11 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50"
-            >
-              <Star className="h-4 w-4" />
-              บันทึกเป็นรายการโปรด
-            </button>
+            <FavoriteCaseButton
+              caseId={caseDetail.id}
+              slug={caseDetail.slug}
+              isFavorited={caseDetail.is_favorited}
+              canFavorite={caseDetail.can_favorite}
+            />
             <button
               type="button"
               onClick={copyLink}

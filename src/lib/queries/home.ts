@@ -28,6 +28,7 @@ export type HomeCase = {
   slug: string
   title: string
   subtitle: string | null
+  status?: string
   location: string | null
   budget_min: number | null
   budget_max: number | null
@@ -69,6 +70,7 @@ export const CASE_SELECT = `
   slug,
   title,
   subtitle,
+  status,
   location,
   budget_min,
   budget_max,

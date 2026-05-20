@@ -58,6 +58,9 @@ export type CaseDetail = {
   installation_notes: string | null
   sales_notes: string | null
   customer_visible_notes: string | null
+  view_count: number | null
+  is_favorited: boolean
+  can_favorite: boolean
   published_at: string | null
   categories: CaseLookup | null
   site_types: CaseLookup | null
@@ -83,6 +86,8 @@ type RawCaseDetail = Omit<
   | 'case_documents'
   | 'faqs'
   | 'tags'
+  | 'is_favorited'
+  | 'can_favorite'
 > & {
   categories: CaseLookup | CaseLookup[] | null
   site_types: CaseLookup | CaseLookup[] | null
@@ -112,6 +117,7 @@ const CASE_DETAIL_SELECT = `
   installation_notes,
   sales_notes,
   customer_visible_notes,
+  view_count,
   published_at,
   categories (
     slug,
@@ -175,9 +181,15 @@ function firstRelation<T>(relation: T | T[] | null): T | null {
   return relation
 }
 
-function normalizeCaseDetail(caseDetail: RawCaseDetail): CaseDetail {
+function normalizeCaseDetail(
+  caseDetail: RawCaseDetail,
+  isFavorited: boolean,
+  canFavorite: boolean,
+): CaseDetail {
   return {
     ...caseDetail,
+    is_favorited: isFavorited,
+    can_favorite: canFavorite,
     categories: firstRelation(caseDetail.categories),
     site_types: firstRelation(caseDetail.site_types),
     door_types: firstRelation(caseDetail.door_types),
@@ -211,7 +223,29 @@ export async function getCaseDetail(slug: string): Promise<CaseDetail | null> {
     return null
   }
 
-  return normalizeCaseDetail(data as unknown as RawCaseDetail)
+  const caseDetail = data as unknown as RawCaseDetail
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  let isFavorited = false
+
+  if (user) {
+    const { data: favorite, error: favoriteError } = await supabase
+      .from('user_case_favorites')
+      .select('case_id')
+      .eq('user_id', user.id)
+      .eq('case_id', caseDetail.id)
+      .maybeSingle()
+
+    if (favoriteError) {
+      throw new Error(favoriteError.message)
+    }
+
+    isFavorited = Boolean(favorite)
+  }
+
+  return normalizeCaseDetail(caseDetail, isFavorited, Boolean(user))
 }
 
 export async function getCaseSlugs(): Promise<string[]> {

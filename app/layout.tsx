@@ -19,9 +19,6 @@ export const metadata: Metadata = {
   },
   description:
     'Tigersoft sales and installation reference portal for access control, time attendance, carpark, flap barrier, and swing gate projects.',
-  icons: {
-    icon: '/icon.svg',
-  },
 };
 
 export default function RootLayout({

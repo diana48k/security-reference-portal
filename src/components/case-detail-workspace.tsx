@@ -23,6 +23,7 @@ import {
 } from 'lucide-react'
 
 import { FavoriteCaseButton } from '@/src/components/favorite-case-button'
+import { CaseImageCarousel } from '@/src/components/case-image-carousel'
 import {
   formatBudget,
   formatThaiDate,
@@ -87,6 +88,7 @@ function GalleryPanel({
             fill
             sizes="(min-width: 1280px) 36vw, 100vw"
             priority
+            loading="eager"
             className="object-cover"
           />
         ) : (
@@ -405,6 +407,15 @@ export function CaseDetailWorkspace({ caseDetail }: CaseDetailWorkspaceProps) {
               label="หลังติดตั้ง"
             />
           </div>
+
+          <CaseImageCarousel
+            images={galleryImages}
+            title={caseDetail.title}
+            label="รูปภาพทั้งหมด"
+            sizes="(min-width: 1280px) 62vw, 100vw"
+            priority
+            emptyText="ยังไม่มีรูปภาพสำหรับเคสนี้"
+          />
 
           {galleryImages.length > 0 ? (
             <div className="flex gap-3 overflow-x-auto pb-1">

@@ -1,12 +1,8 @@
-import Image from 'next/image'
 import Link from 'next/link'
 import { ArrowRight, MapPin } from 'lucide-react'
 
-import {
-  formatBudget,
-  getCaseImageUrl,
-  getPrimaryCaseImage,
-} from '@/src/lib/case-utils'
+import { CaseImageCarousel } from '@/src/components/case-image-carousel'
+import { formatBudget, sortBySortOrder } from '@/src/lib/case-utils'
 import type { HomeCase } from '@/src/lib/queries/home'
 
 type CaseCardProps = {
@@ -14,29 +10,19 @@ type CaseCardProps = {
 }
 
 export function CaseCard({ caseStudy }: CaseCardProps) {
-  const primaryImage = getPrimaryCaseImage(caseStudy.case_images)
-  const primaryImageUrl = primaryImage ? getCaseImageUrl(primaryImage) : null
+  const images = sortBySortOrder(caseStudy.case_images)
 
   return (
-    <Link
-      href={`/cases/${caseStudy.slug}`}
-      className="group overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
-    >
-      <div className="relative aspect-[16/10] overflow-hidden bg-slate-100">
-        {primaryImageUrl ? (
-          <Image
-            src={primaryImageUrl}
-            alt={primaryImage?.caption ?? caseStudy.title}
-            fill
-            sizes="(min-width: 1280px) 25vw, (min-width: 768px) 50vw, 100vw"
-            className="object-cover transition duration-500 group-hover:scale-105"
-          />
-        ) : (
-          <div className="flex h-full items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 text-sm text-slate-500">
-            ยังไม่มีรูปตัวอย่าง
-          </div>
-        )}
-
+    <article className="group overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl">
+      <div className="relative">
+        <CaseImageCarousel
+          images={images}
+          title={caseStudy.title}
+          sizes="(min-width: 1280px) 25vw, (min-width: 768px) 50vw, 100vw"
+          showThumbnails={false}
+          emptyText="ยังไม่มีรูปตัวอย่าง"
+          className="rounded-none border-0 shadow-none"
+        />
         <div className="absolute left-4 top-4 rounded-full bg-slate-950/80 px-3 py-1 text-xs font-medium text-white backdrop-blur">
           {caseStudy.categories?.name_th ?? 'Case Study'}
         </div>
@@ -44,9 +30,11 @@ export function CaseCard({ caseStudy }: CaseCardProps) {
 
       <div className="space-y-4 p-5">
         <div>
-          <h3 className="line-clamp-2 text-lg font-semibold text-slate-950">
-            {caseStudy.title}
-          </h3>
+          <Link href={`/cases/${caseStudy.slug}`} className="block">
+            <h3 className="line-clamp-2 text-lg font-semibold text-slate-950 transition hover:text-blue-700">
+              {caseStudy.title}
+            </h3>
+          </Link>
           {caseStudy.subtitle ? (
             <p className="mt-2 line-clamp-2 text-sm text-slate-600">
               {caseStudy.subtitle}
@@ -87,11 +75,14 @@ export function CaseCard({ caseStudy }: CaseCardProps) {
           ) : null}
         </div>
 
-        <div className="flex items-center justify-between pt-2 text-sm font-medium text-slate-950">
+        <Link
+          href={`/cases/${caseStudy.slug}`}
+          className="flex items-center justify-between pt-2 text-sm font-medium text-slate-950 transition hover:text-blue-700"
+        >
           <span>ดูรายละเอียดเคส</span>
           <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
-        </div>
+        </Link>
       </div>
-    </Link>
+    </article>
   )
 }

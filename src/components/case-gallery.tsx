@@ -1,5 +1,4 @@
-import Image from 'next/image'
-
+import { CaseImageCarousel } from '@/src/components/case-image-carousel'
 import {
   getCaseImageUrl,
   getImagesByKind,
@@ -10,33 +9,6 @@ import type { CaseDetailImage } from '@/src/lib/queries/case-detail'
 type CaseGalleryProps = {
   images: CaseDetailImage[]
   title: string
-}
-
-function GalleryImage({ image, title }: { image: CaseDetailImage; title: string }) {
-  const imageUrl = getCaseImageUrl(image)
-
-  if (!imageUrl) {
-    return null
-  }
-
-  return (
-    <figure className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-      <div className="relative aspect-[16/10] bg-slate-100">
-        <Image
-          src={imageUrl}
-          alt={image.alt_text ?? image.caption ?? title}
-          fill
-          sizes="(min-width: 1024px) 33vw, 100vw"
-          className="object-cover"
-        />
-      </div>
-      {image.caption ? (
-        <figcaption className="px-4 py-3 text-sm text-slate-600">
-          {image.caption}
-        </figcaption>
-      ) : null}
-    </figure>
-  )
 }
 
 export function CaseGallery({ images, title }: CaseGalleryProps) {
@@ -64,11 +36,12 @@ export function CaseGallery({ images, title }: CaseGalleryProps) {
               <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">
                 ก่อนติดตั้ง
               </h3>
-              <div className="grid gap-4">
-                {beforeImages.map((image) => (
-                  <GalleryImage key={image.id} image={image} title={title} />
-                ))}
-              </div>
+              <CaseImageCarousel
+                images={beforeImages}
+                title={title}
+                label="ก่อนติดตั้ง"
+                sizes="(min-width: 1024px) 50vw, 100vw"
+              />
             </section>
           ) : null}
 
@@ -77,11 +50,12 @@ export function CaseGallery({ images, title }: CaseGalleryProps) {
               <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">
                 หลังติดตั้ง
               </h3>
-              <div className="grid gap-4">
-                {afterImages.map((image) => (
-                  <GalleryImage key={image.id} image={image} title={title} />
-                ))}
-              </div>
+              <CaseImageCarousel
+                images={afterImages}
+                title={title}
+                label="หลังติดตั้ง"
+                sizes="(min-width: 1024px) 50vw, 100vw"
+              />
             </section>
           ) : null}
         </div>
@@ -92,11 +66,12 @@ export function CaseGallery({ images, title }: CaseGalleryProps) {
           <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">
             แกลเลอรี
           </h3>
-          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-            {otherImages.map((image) => (
-              <GalleryImage key={image.id} image={image} title={title} />
-            ))}
-          </div>
+          <CaseImageCarousel
+            images={otherImages}
+            title={title}
+            label="แกลเลอรี"
+            sizes="(min-width: 1280px) 70vw, 100vw"
+          />
         </section>
       ) : null}
     </div>

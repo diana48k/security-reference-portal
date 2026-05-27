@@ -1,4 +1,5 @@
 import { createSupabaseServerClient } from '@/src/lib/supabase/server'
+import { hasSupabasePublicConfig } from '@/src/lib/supabase/config'
 import {
   CASE_SELECT,
   normalizeCase,
@@ -16,6 +17,11 @@ export type CategoryPageData = {
 export async function getCategoryPageData(
   slug: string,
 ): Promise<CategoryPageData | null> {
+  if (!hasSupabasePublicConfig()) {
+    console.error('Supabase environment variables are missing.')
+    return null
+  }
+
   const supabase = await createSupabaseServerClient()
 
   const [categoryResult, relatedCategoriesResult] = await Promise.all([
@@ -33,11 +39,13 @@ export async function getCategoryPageData(
   ])
 
   if (categoryResult.error) {
-    throw new Error(categoryResult.error.message)
+    console.error('Unable to load category.', categoryResult.error)
+    return null
   }
 
   if (relatedCategoriesResult.error) {
-    throw new Error(relatedCategoriesResult.error.message)
+    console.error('Unable to load related categories.', relatedCategoriesResult.error)
+    return null
   }
 
   if (!categoryResult.data) {
@@ -53,7 +61,8 @@ export async function getCategoryPageData(
     .order('published_at', { ascending: false })
 
   if (casesResult.error) {
-    throw new Error(casesResult.error.message)
+    console.error('Unable to load category cases.', casesResult.error)
+    return null
   }
 
   return {

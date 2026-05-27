@@ -1,4 +1,5 @@
 import { createSupabaseServerClient } from '@/src/lib/supabase/server'
+import { hasSupabasePublicConfig } from '@/src/lib/supabase/config'
 import {
   CASE_SELECT,
   normalizeCase,
@@ -63,7 +64,7 @@ function escapeSearchValue(value: string) {
 }
 
 async function getLookupId(table: LookupTable, slug: string) {
-  if (!slug) return null
+  if (!slug || !hasSupabasePublicConfig()) return null
 
   const supabase = await createSupabaseServerClient()
   const { data, error } = await supabase
@@ -73,13 +74,26 @@ async function getLookupId(table: LookupTable, slug: string) {
     .maybeSingle()
 
   if (error) {
-    throw new Error(error.message)
+    console.error(`Unable to load lookup id from ${table}.`, error)
+    return null
   }
 
   return data?.id ?? null
 }
 
 async function getOptions(): Promise<SearchFilterOptions> {
+  const emptyOptions: SearchFilterOptions = {
+    categories: [],
+    siteTypes: [],
+    doorTypes: [],
+    systemTypes: [],
+  }
+
+  if (!hasSupabasePublicConfig()) {
+    console.error('Supabase environment variables are missing.')
+    return emptyOptions
+  }
+
   const supabase = await createSupabaseServerClient()
 
   const [categories, siteTypes, doorTypes, systemTypes] = await Promise.all([
@@ -107,7 +121,8 @@ async function getOptions(): Promise<SearchFilterOptions> {
 
   for (const result of [categories, siteTypes, doorTypes, systemTypes]) {
     if (result.error) {
-      throw new Error(result.error.message)
+      console.error('Unable to load search filter options.', result.error)
+      return emptyOptions
     }
   }
 
@@ -123,6 +138,21 @@ export async function getSearchPageData(
   params: SearchParamsInput,
 ): Promise<SearchPageData> {
   const filters = normalizeFilters(params)
+
+  if (!hasSupabasePublicConfig()) {
+    console.error('Supabase environment variables are missing.')
+    return {
+      filters,
+      options: {
+        categories: [],
+        siteTypes: [],
+        doorTypes: [],
+        systemTypes: [],
+      },
+      cases: [],
+    }
+  }
+
   const supabase = await createSupabaseServerClient()
 
   const [options, categoryId, siteTypeId, doorTypeId, systemTypeId] =
@@ -171,7 +201,12 @@ export async function getSearchPageData(
     .limit(60)
 
   if (error) {
-    throw new Error(error.message)
+    console.error('Unable to load search results.', error)
+    return {
+      filters,
+      options,
+      cases: [],
+    }
   }
 
   let cases = ((data ?? []) as unknown as RawHomeCase[]).map(normalizeCase)

@@ -1,4 +1,5 @@
 import { createSupabaseServerClient } from '@/src/lib/supabase/server'
+import { hasSupabasePublicConfig } from '@/src/lib/supabase/config'
 
 export type HomeCategory = {
   id: string
@@ -125,67 +126,84 @@ export function normalizeCase(caseStudy: RawHomeCase): HomeCase {
 }
 
 export async function getHomePageData(): Promise<HomePageData> {
+  const emptyData: HomePageData = {
+    categories: [],
+    featuredCases: [],
+    latestCases: [],
+    faqs: [],
+  }
+
+  if (!hasSupabasePublicConfig()) {
+    console.error('Supabase environment variables are missing.')
+    return emptyData
+  }
+
   const supabase = await createSupabaseServerClient()
 
-  const [categoriesResult, featuredCasesResult, latestCasesResult, faqsResult] =
-    await Promise.all([
-      supabase
-        .from('categories')
-        .select('id, slug, name_th, name_en, description, icon')
-        .eq('is_active', true)
-        .order('sort_order', { ascending: true }),
+  try {
+    const [categoriesResult, featuredCasesResult, latestCasesResult, faqsResult] =
+      await Promise.all([
+        supabase
+          .from('categories')
+          .select('id, slug, name_th, name_en, description, icon')
+          .eq('is_active', true)
+          .order('sort_order', { ascending: true }),
 
-      supabase
-        .from('case_studies')
-        .select(CASE_SELECT)
-        .eq('status', 'published')
-        .eq('is_featured', true)
-        .order('published_at', { ascending: false })
-        .limit(3),
+        supabase
+          .from('case_studies')
+          .select(CASE_SELECT)
+          .eq('status', 'published')
+          .eq('is_featured', true)
+          .order('published_at', { ascending: false })
+          .limit(3),
 
-      supabase
-        .from('case_studies')
-        .select(CASE_SELECT)
-        .eq('status', 'published')
-        .order('published_at', { ascending: false })
-        .limit(8),
+        supabase
+          .from('case_studies')
+          .select(CASE_SELECT)
+          .eq('status', 'published')
+          .order('published_at', { ascending: false })
+          .limit(8),
 
-      supabase
-        .from('faqs')
-        .select('id, question, answer')
-        .eq('is_active', true)
-        .eq('is_global', true)
-        .order('sort_order', { ascending: true })
-        .limit(6),
-    ])
+        supabase
+          .from('faqs')
+          .select('id, question, answer')
+          .eq('is_active', true)
+          .eq('is_global', true)
+          .order('sort_order', { ascending: true })
+          .limit(6),
+      ])
 
-  if (categoriesResult.error) {
-    throw new Error(categoriesResult.error.message)
-  }
+    if (categoriesResult.error) {
+      throw new Error(categoriesResult.error.message)
+    }
 
-  if (featuredCasesResult.error) {
-    throw new Error(featuredCasesResult.error.message)
-  }
+    if (featuredCasesResult.error) {
+      throw new Error(featuredCasesResult.error.message)
+    }
 
-  if (latestCasesResult.error) {
-    throw new Error(latestCasesResult.error.message)
-  }
+    if (latestCasesResult.error) {
+      throw new Error(latestCasesResult.error.message)
+    }
 
-  if (faqsResult.error) {
-    throw new Error(faqsResult.error.message)
-  }
+    if (faqsResult.error) {
+      throw new Error(faqsResult.error.message)
+    }
 
-  const featuredCases = ((featuredCasesResult.data ?? []) as unknown as RawHomeCase[]).map(
-    normalizeCase,
-  )
-  const latestCases = ((latestCasesResult.data ?? []) as unknown as RawHomeCase[]).map(
-    normalizeCase,
-  )
+    const featuredCases = ((featuredCasesResult.data ?? []) as unknown as RawHomeCase[]).map(
+      normalizeCase,
+    )
+    const latestCases = ((latestCasesResult.data ?? []) as unknown as RawHomeCase[]).map(
+      normalizeCase,
+    )
 
-  return {
-    categories: (categoriesResult.data ?? []) as HomeCategory[],
-    featuredCases,
-    latestCases,
-    faqs: (faqsResult.data ?? []) as HomeFaq[],
+    return {
+      categories: (categoriesResult.data ?? []) as HomeCategory[],
+      featuredCases,
+      latestCases,
+      faqs: (faqsResult.data ?? []) as HomeFaq[],
+    }
+  } catch (error) {
+    console.error('Unable to load home page data.', error)
+    return emptyData
   }
 }

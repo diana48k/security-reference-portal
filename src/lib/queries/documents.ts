@@ -1,4 +1,5 @@
 import { createSupabaseServerClient } from '@/src/lib/supabase/server'
+import { hasSupabasePublicConfig } from '@/src/lib/supabase/config'
 
 export type DocumentCaseLookup = {
   title: string
@@ -60,6 +61,11 @@ function normalizeDocument(document: RawPortalDocument): PortalDocument {
 }
 
 export async function getPublishedDocuments(): Promise<PortalDocument[]> {
+  if (!hasSupabasePublicConfig()) {
+    console.error('Supabase environment variables are missing.')
+    return []
+  }
+
   const supabase = await createSupabaseServerClient()
 
   const { data, error } = await supabase
@@ -88,7 +94,10 @@ export async function getPublishedDocuments(): Promise<PortalDocument[]> {
     .order('created_at', { ascending: false })
     .limit(80)
 
-  if (error) throw new Error(error.message)
+  if (error) {
+    console.error('Unable to load published documents.', error)
+    return []
+  }
 
   return ((data ?? []) as unknown as RawPortalDocument[])
     .map(normalizeDocument)

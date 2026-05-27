@@ -1,4 +1,5 @@
 import { createSupabaseServerClient } from '@/src/lib/supabase/server'
+import { hasSupabasePublicConfig } from '@/src/lib/supabase/config'
 
 export type CaseLookup = {
   slug: string
@@ -213,6 +214,11 @@ function normalizeCaseDetail(
 }
 
 export async function getCaseDetail(slug: string): Promise<CaseDetail | null> {
+  if (!hasSupabasePublicConfig()) {
+    console.error('Supabase environment variables are missing.')
+    return null
+  }
+
   const supabase = await createSupabaseServerClient()
 
   const { data, error } = await supabase
@@ -223,7 +229,8 @@ export async function getCaseDetail(slug: string): Promise<CaseDetail | null> {
     .maybeSingle()
 
   if (error) {
-    throw new Error(error.message)
+    console.error('Unable to load case detail.', error)
+    return null
   }
 
   if (!data) {
@@ -273,6 +280,11 @@ export async function getCaseDetail(slug: string): Promise<CaseDetail | null> {
 }
 
 export async function getCaseSlugs(): Promise<string[]> {
+  if (!hasSupabasePublicConfig()) {
+    console.error('Supabase environment variables are missing.')
+    return []
+  }
+
   const supabase = await createSupabaseServerClient()
 
   const { data, error } = await supabase
@@ -281,7 +293,8 @@ export async function getCaseSlugs(): Promise<string[]> {
     .eq('status', 'published')
 
   if (error) {
-    throw new Error(error.message)
+    console.error('Unable to load case slugs.', error)
+    return []
   }
 
   return (data ?? []).map((caseStudy) => caseStudy.slug as string)

@@ -61,6 +61,8 @@ export type CaseDetail = {
   view_count: number | null
   is_favorited: boolean
   can_favorite: boolean
+  feedback_value: boolean | null
+  can_feedback: boolean
   published_at: string | null
   categories: CaseLookup | null
   site_types: CaseLookup | null
@@ -88,6 +90,8 @@ type RawCaseDetail = Omit<
   | 'tags'
   | 'is_favorited'
   | 'can_favorite'
+  | 'feedback_value'
+  | 'can_feedback'
 > & {
   categories: CaseLookup | CaseLookup[] | null
   site_types: CaseLookup | CaseLookup[] | null
@@ -185,11 +189,14 @@ function normalizeCaseDetail(
   caseDetail: RawCaseDetail,
   isFavorited: boolean,
   canFavorite: boolean,
+  feedbackValue: boolean | null,
 ): CaseDetail {
   return {
     ...caseDetail,
     is_favorited: isFavorited,
     can_favorite: canFavorite,
+    feedback_value: feedbackValue,
+    can_feedback: canFavorite,
     categories: firstRelation(caseDetail.categories),
     site_types: firstRelation(caseDetail.site_types),
     door_types: firstRelation(caseDetail.door_types),
@@ -229,23 +236,40 @@ export async function getCaseDetail(slug: string): Promise<CaseDetail | null> {
   } = await supabase.auth.getUser()
 
   let isFavorited = false
+  let feedbackValue: boolean | null = null
 
   if (user) {
-    const { data: favorite, error: favoriteError } = await supabase
-      .from('user_case_favorites')
-      .select('case_id')
-      .eq('user_id', user.id)
-      .eq('case_id', caseDetail.id)
-      .maybeSingle()
+    const [favoriteResult, feedbackResult] = await Promise.all([
+      supabase
+        .from('user_case_favorites')
+        .select('case_id')
+        .eq('user_id', user.id)
+        .eq('case_id', caseDetail.id)
+        .maybeSingle(),
+      supabase
+        .from('user_case_feedback')
+        .select('is_useful')
+        .eq('user_id', user.id)
+        .eq('case_id', caseDetail.id)
+        .maybeSingle(),
+    ])
 
-    if (favoriteError) {
-      throw new Error(favoriteError.message)
+    if (favoriteResult.error) {
+      throw new Error(favoriteResult.error.message)
     }
 
-    isFavorited = Boolean(favorite)
+    if (feedbackResult.error) {
+      throw new Error(feedbackResult.error.message)
+    }
+
+    isFavorited = Boolean(favoriteResult.data)
+    feedbackValue =
+      typeof feedbackResult.data?.is_useful === 'boolean'
+        ? feedbackResult.data.is_useful
+        : null
   }
 
-  return normalizeCaseDetail(caseDetail, isFavorited, Boolean(user))
+  return normalizeCaseDetail(caseDetail, isFavorited, Boolean(user), feedbackValue)
 }
 
 export async function getCaseSlugs(): Promise<string[]> {

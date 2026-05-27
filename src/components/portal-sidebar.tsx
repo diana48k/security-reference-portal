@@ -62,7 +62,7 @@ const primaryNav: NavItem[] = [
 ]
 
 const workspaceNav: NavItem[] = [
-  { href: '/favorites', label: 'รายการโปรดของฉัน', icon: Star, badge: '12' },
+  { href: '/favorites', label: 'รายการโปรดของฉัน', icon: Star },
   { href: '/recent', label: 'ดูล่าสุด', icon: Clock3 },
 ]
 
@@ -250,15 +250,6 @@ export function PortalSidebar({
             </Link>
           </div>
 
-          <div className="rounded-2xl border border-white/10 p-4">
-            <div className="flex items-center justify-between text-xs text-slate-300">
-              <span>พื้นที่จัดเก็บเอกสาร</span>
-              <span>24%</span>
-            </div>
-            <div className="mt-3 h-2 rounded-full bg-white/10">
-              <div className="h-2 w-1/4 rounded-full bg-emerald-400" />
-            </div>
-          </div>
         </div>
       </aside>
     </>

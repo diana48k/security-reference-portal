@@ -86,3 +86,35 @@ export async function toggleFavoriteAction({
   revalidatePath('/favorites')
   revalidatePath(getCasePath(slug))
 }
+
+export async function submitCaseFeedbackAction({
+  caseId,
+  slug,
+  isUseful,
+}: {
+  caseId: string
+  slug: string
+  isUseful: boolean
+}) {
+  const userId = await getCurrentUserId()
+
+  if (!userId) {
+    redirect(`/login?next=${encodeURIComponent(getCasePath(slug))}`)
+  }
+
+  const supabase = await createSupabaseServerClient()
+  const { error } = await supabase.from('user_case_feedback').upsert(
+    {
+      user_id: userId,
+      case_id: caseId,
+      is_useful: isUseful,
+    },
+    {
+      onConflict: 'user_id,case_id',
+    },
+  )
+
+  if (error) throw new Error(error.message)
+
+  revalidatePath(getCasePath(slug))
+}

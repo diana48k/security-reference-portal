@@ -23,6 +23,7 @@ import {
 } from 'lucide-react'
 
 import { FavoriteCaseButton } from '@/src/components/favorite-case-button'
+import { CaseFeedbackPanel } from '@/src/components/case-feedback-panel'
 import { CaseImageCarousel } from '@/src/components/case-image-carousel'
 import {
   formatBudget,
@@ -584,21 +585,16 @@ export function CaseDetailWorkspace({ caseDetail }: CaseDetailWorkspaceProps) {
           </section>
 
           <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white px-5 py-4 text-sm text-slate-600 shadow-sm">
-            <div className="font-semibold text-slate-700">
-              เคสนี้มีประโยชน์กับคุณหรือไม่?
-            </div>
-            <div className="flex flex-wrap gap-3">
-              <button type="button" className="font-bold text-emerald-700">
-                มีประโยชน์
-              </button>
-              <button type="button" className="font-bold text-red-600">
-                ไม่มีประโยชน์
-              </button>
-            </div>
+            <CaseFeedbackPanel
+              caseId={caseDetail.id}
+              slug={caseDetail.slug}
+              initialFeedback={caseDetail.feedback_value}
+              canFeedback={caseDetail.can_feedback}
+            />
             <div className="flex flex-wrap gap-5">
               <span className="inline-flex items-center gap-2">
                 <Eye className="h-4 w-4" />
-                เปิดดู: ยังไม่บันทึกสถิติ
+                เปิดดู: {(caseDetail.view_count ?? 0).toLocaleString('th-TH')} ครั้ง
               </span>
               <span>โดย: ทีมเทคนิค</span>
             </div>

@@ -59,6 +59,10 @@ type CaseStatus = (typeof CASE_STATUSES)[number]
 type ImageKind = (typeof IMAGE_KINDS)[number]
 type DocumentKind = (typeof DOCUMENT_KINDS)[number]
 
+export type CaseFormState = {
+  error: string | null
+}
+
 function createSlug(input: string) {
   return input
     .toLowerCase()
@@ -237,6 +241,24 @@ function revalidateCasePaths(slug?: string | null) {
   }
 }
 
+function getErrorMessage(error: unknown) {
+  return error instanceof Error
+    ? error.message
+    : 'Could not save this case. Please try again.'
+}
+
+function getCaseMutationErrorMessage(error: { code?: string; message: string }) {
+  if (error.code === '23505') {
+    return 'ไม่สามารถบันทึกได้ เพราะชื่อ URL (Slug) นี้ถูกใช้แล้ว กรุณาเปลี่ยน slug แล้วลองใหม่อีกครั้ง'
+  }
+
+  if (error.code === '42501') {
+    return 'ไม่สามารถบันทึกได้ กรุณาตรวจสอบสิทธิ์ผู้ใช้ว่าเป็น admin หรือ tech'
+  }
+
+  return error.message
+}
+
 async function getExistingCase(id: string) {
   const supabase = await createSupabaseServerClient()
   const { data, error } = await supabase
@@ -261,10 +283,21 @@ async function getExistingCase(id: string) {
   }
 }
 
-export async function createCaseStudyAction(formData: FormData) {
+export async function createCaseStudyAction(
+  _prevState: CaseFormState,
+  formData: FormData,
+): Promise<CaseFormState> {
   const { user } = await getCurrentAdminUser()
   const supabase = await createSupabaseServerClient()
-  const { payload, slug } = buildCasePayload(formData, user.id)
+  let casePayload: ReturnType<typeof buildCasePayload>
+
+  try {
+    casePayload = buildCasePayload(formData, user.id)
+  } catch (error) {
+    return { error: getErrorMessage(error) }
+  }
+
+  const { payload, slug } = casePayload
 
   const { error } = await supabase.from('case_studies').insert({
     ...payload,
@@ -272,24 +305,35 @@ export async function createCaseStudyAction(formData: FormData) {
   })
 
   if (error) {
-    throw new Error(error.message)
+    return { error: getCaseMutationErrorMessage(error) }
   }
 
   revalidateCasePaths(slug)
   redirect('/admin/cases')
 }
 
-export async function updateCaseStudyAction(formData: FormData) {
+export async function updateCaseStudyAction(
+  _prevState: CaseFormState,
+  formData: FormData,
+): Promise<CaseFormState> {
   const { user } = await getCurrentAdminUser()
   const supabase = await createSupabaseServerClient()
   const id = String(formData.get('id') ?? '')
 
   if (!id) {
-    throw new Error('Case id is required.')
+    return { error: 'Case id is required.' }
   }
 
   const existingCase = await getExistingCase(id)
-  const { payload, slug } = buildCasePayload(formData, user.id)
+  let casePayload: ReturnType<typeof buildCasePayload>
+
+  try {
+    casePayload = buildCasePayload(formData, user.id)
+  } catch (error) {
+    return { error: getErrorMessage(error) }
+  }
+
+  const { payload, slug } = casePayload
   const publishedAt =
     payload.status === 'published'
       ? existingCase.published_at ?? new Date().toISOString()
@@ -304,7 +348,7 @@ export async function updateCaseStudyAction(formData: FormData) {
     .eq('id', id)
 
   if (error) {
-    throw new Error(error.message)
+    return { error: getCaseMutationErrorMessage(error) }
   }
 
   revalidateCasePaths(existingCase.slug)

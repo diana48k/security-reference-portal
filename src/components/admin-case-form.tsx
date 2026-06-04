@@ -1,7 +1,11 @@
+'use client'
+
 import Link from 'next/link'
+import { useActionState } from 'react'
 
 import { SubmitButton } from '@/src/components/submit-button'
 import {
+  type CaseFormState,
   createCaseStudyAction,
   updateCaseStudyAction,
 } from '@/src/lib/actions/cases'
@@ -27,6 +31,10 @@ function numberValue(value: number | null | undefined) {
   return value ?? ''
 }
 
+const initialCaseFormState: CaseFormState = {
+  error: null,
+}
+
 export function AdminCaseForm({
   mode,
   caseStudy,
@@ -37,9 +45,10 @@ export function AdminCaseForm({
 }: AdminCaseFormProps) {
   const action =
     mode === 'edit' ? updateCaseStudyAction : createCaseStudyAction
+  const [state, formAction] = useActionState(action, initialCaseFormState)
 
   return (
-    <form action={action} className="space-y-6">
+    <form action={formAction} className="space-y-6">
       {caseStudy ? <input type="hidden" name="id" value={caseStudy.id} /> : null}
 
       <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -249,6 +258,15 @@ export function AdminCaseForm({
           </label>
         </div>
       </section>
+
+      {state.error ? (
+        <div
+          role="alert"
+          className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700"
+        >
+          {state.error}
+        </div>
+      ) : null}
 
       <div className="flex flex-wrap gap-3">
         <SubmitButton

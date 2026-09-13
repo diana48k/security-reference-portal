@@ -1,17 +1,22 @@
-import Image from 'next/image'
-import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { ArrowLeft, Building2, History, ShieldCheck } from 'lucide-react'
 
-import { BrandLogo } from '@/src/components/brand-logo'
-import { PresentationActions } from '@/src/components/presentation-actions'
+import {
+  CasePresentationDeck,
+  type CasePresentationData,
+  type PresentationImage,
+} from '@/src/components/case-presentation-deck'
 import {
   formatBudget,
   formatThaiDate,
   getCaseImageUrl,
+  getImagesByKind,
   getPrimaryCaseImage,
+  sortBySortOrder,
 } from '@/src/lib/case-utils'
-import { getCaseDetail } from '@/src/lib/queries/case-detail'
+import {
+  getCaseDetail,
+  type CaseDetailImage,
+} from '@/src/lib/queries/case-detail'
 
 type PresentationPageProps = {
   params: Promise<{
@@ -28,7 +33,31 @@ export async function generateMetadata({ params }: PresentationPageProps) {
   }
 }
 
-export default async function CasePresentationPage({ params }: PresentationPageProps) {
+function toPresentationImage(
+  image: CaseDetailImage,
+  title: string,
+): PresentationImage | null {
+  const url = getCaseImageUrl(image)
+
+  if (!url) return null
+
+  return {
+    id: image.id,
+    url,
+    alt: image.alt_text ?? image.caption ?? title,
+    caption: image.caption,
+  }
+}
+
+function mapImages(images: CaseDetailImage[], title: string) {
+  return images
+    .map((image) => toPresentationImage(image, title))
+    .filter((image): image is PresentationImage => Boolean(image))
+}
+
+export default async function CasePresentationPage({
+  params,
+}: PresentationPageProps) {
   const { slug } = await params
   const caseDetail = await getCaseDetail(slug)
 
@@ -37,149 +66,55 @@ export default async function CasePresentationPage({ params }: PresentationPageP
   }
 
   const primaryImage = getPrimaryCaseImage(caseDetail.case_images)
-  const primaryImageUrl = primaryImage ? getCaseImageUrl(primaryImage) : null
+  const hasBudget = Boolean(caseDetail.budget_min || caseDetail.budget_max)
+  const data: CasePresentationData = {
+    id: caseDetail.id,
+    slug: caseDetail.slug,
+    title: caseDetail.title,
+    subtitle: caseDetail.subtitle,
+    category: caseDetail.categories?.name_th ?? null,
+    siteType: caseDetail.site_types?.name_th ?? null,
+    doorType: caseDetail.door_types?.name_th ?? null,
+    systemType: caseDetail.system_types?.name_th ?? null,
+    location: caseDetail.location,
+    budget: hasBudget
+      ? formatBudget(caseDetail.budget_min, caseDetail.budget_max)
+      : null,
+    userCount: caseDetail.user_count
+      ? `${caseDetail.user_count.toLocaleString('th-TH')} คน`
+      : null,
+    installationDays: caseDetail.installation_days
+      ? `${caseDetail.installation_days} วัน`
+      : null,
+    installedAt: caseDetail.installed_at
+      ? formatThaiDate(caseDetail.installed_at)
+      : null,
+    problem: caseDetail.problem_statement,
+    requirement: caseDetail.requirement_summary,
+    solution: caseDetail.solution_statement,
+    outcome: caseDetail.customer_visible_notes,
+    primaryImage: primaryImage
+      ? toPresentationImage(primaryImage, caseDetail.title)
+      : null,
+    beforeImages: mapImages(
+      getImagesByKind(caseDetail.case_images, 'before'),
+      caseDetail.title,
+    ),
+    afterImages: mapImages(
+      getImagesByKind(caseDetail.case_images, 'after'),
+      caseDetail.title,
+    ),
+    galleryImages: mapImages(
+      sortBySortOrder(
+        caseDetail.case_images.filter((image) => image.kind === 'gallery'),
+      ),
+      caseDetail.title,
+    ),
+    diagramImages: mapImages(
+      getImagesByKind(caseDetail.case_images, 'diagram'),
+      caseDetail.title,
+    ),
+  }
 
-  return (
-    <main className="min-h-screen bg-slate-950 text-white">
-      <div className="mx-auto flex min-h-screen max-w-7xl flex-col px-6 py-8 lg:px-8">
-        <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-            <Link
-              href={`/cases/${caseDetail.slug}`}
-              className="inline-flex items-center gap-2 text-sm font-semibold text-slate-300 transition hover:text-white print:hidden"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              กลับหน้าเคส
-            </Link>
-            <BrandLogo tone="light" />
-          </div>
-          <PresentationActions title={caseDetail.title} caseId={caseDetail.id} />
-        </div>
-
-        <section className="grid flex-1 items-center gap-10 py-12 lg:grid-cols-[1.1fr_0.9fr]">
-          <div>
-            <div className="mb-5 flex flex-wrap gap-2">
-              {caseDetail.categories ? (
-                <span className="rounded-full bg-white px-3 py-1 text-xs font-bold text-slate-950">
-                  {caseDetail.categories.name_th}
-                </span>
-              ) : null}
-              {caseDetail.site_types ? (
-                <span className="rounded-full border border-white/20 px-3 py-1 text-xs font-bold text-slate-200">
-                  {caseDetail.site_types.name_th}
-                </span>
-              ) : null}
-            </div>
-
-            <h1 className="text-5xl font-bold tracking-tight lg:text-7xl">
-              {caseDetail.title}
-            </h1>
-            {caseDetail.subtitle ? (
-              <p className="mt-6 max-w-3xl text-xl leading-9 text-slate-300">
-                {caseDetail.subtitle}
-              </p>
-            ) : null}
-
-            <div className="mt-8 grid gap-3 sm:grid-cols-3">
-              {[
-                {
-                  icon: ShieldCheck,
-                  label: 'ควบคุมการเข้าออก',
-                },
-                {
-                  icon: History,
-                  label: 'ตรวจสอบย้อนหลังได้',
-                },
-                {
-                  icon: Building2,
-                  label: 'เหมาะกับโรงงาน/ออฟฟิศ',
-                },
-              ].map((benefit) => {
-                const Icon = benefit.icon
-
-                return (
-                  <div
-                    key={benefit.label}
-                    className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/10 p-4 text-sm font-semibold text-white"
-                  >
-                    <Icon className="h-5 w-5 text-red-300" />
-                    {benefit.label}
-                  </div>
-                )
-              })}
-            </div>
-
-            <div className="mt-6 grid gap-4 sm:grid-cols-3">
-              <div className="presentation-budget rounded-3xl bg-white/10 p-5 ring-1 ring-white/10">
-                <div className="text-sm text-slate-400">งบประมาณ</div>
-                <div className="mt-2 font-bold">
-                  {formatBudget(caseDetail.budget_min, caseDetail.budget_max)}
-                </div>
-              </div>
-              <div className="rounded-3xl bg-white/10 p-5 ring-1 ring-white/10">
-                <div className="text-sm text-slate-400">ระยะเวลา</div>
-                <div className="mt-2 font-bold">
-                  {caseDetail.installation_days
-                    ? `${caseDetail.installation_days} วัน`
-                    : 'ไม่ระบุ'}
-                </div>
-              </div>
-              <div className="rounded-3xl bg-white/10 p-5 ring-1 ring-white/10">
-                <div className="text-sm text-slate-400">วันที่ติดตั้ง</div>
-                <div className="mt-2 font-bold">
-                  {formatThaiDate(caseDetail.installed_at)}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="overflow-hidden rounded-[2rem] bg-white/10 ring-1 ring-white/10">
-            {primaryImageUrl ? (
-              <div className="relative aspect-[16/11]">
-                <Image
-                  src={primaryImageUrl}
-                  alt={primaryImage?.caption ?? caseDetail.title}
-                  fill
-                  sizes="(min-width: 1024px) 45vw, 100vw"
-                  priority
-                  className="object-cover"
-                />
-              </div>
-            ) : (
-              <div className="flex aspect-[16/11] items-center justify-center text-slate-400">
-                ยังไม่มีรูปตัวอย่าง
-              </div>
-            )}
-          </div>
-        </section>
-
-        <section className="grid gap-6 pb-10 lg:grid-cols-3">
-          {caseDetail.problem_statement ? (
-            <div className="rounded-3xl bg-white p-6 text-slate-950">
-              <h2 className="font-bold">โจทย์งาน</h2>
-              <p className="mt-3 leading-7 text-slate-600">
-                {caseDetail.problem_statement}
-              </p>
-            </div>
-          ) : null}
-          {caseDetail.solution_statement ? (
-            <div className="rounded-3xl bg-white p-6 text-slate-950">
-              <h2 className="font-bold">แนวทางติดตั้ง</h2>
-              <p className="mt-3 leading-7 text-slate-600">
-                {caseDetail.solution_statement}
-              </p>
-            </div>
-          ) : null}
-          {caseDetail.customer_visible_notes ? (
-            <div className="rounded-3xl bg-white p-6 text-slate-950">
-              <h2 className="font-bold">ข้อความสำหรับลูกค้า</h2>
-              <p className="mt-3 leading-7 text-slate-600">
-                {caseDetail.customer_visible_notes}
-              </p>
-            </div>
-          ) : null}
-        </section>
-      </div>
-    </main>
-  )
+  return <CasePresentationDeck data={data} />
 }

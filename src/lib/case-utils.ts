@@ -31,7 +31,9 @@ export function getCaseDocumentUrl(document: {
   )
 }
 
-export function getPrimaryCaseImage(images: CaseImage[] | null | undefined) {
+export function getPrimaryCaseImage<T extends CaseImage>(
+  images: T[] | null | undefined,
+): T | null {
   if (!images || images.length === 0) {
     return null
   }

@@ -1,7 +1,14 @@
 'use client'
 
 import Image from 'next/image'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import { ChevronLeft, ChevronRight, Expand, X } from 'lucide-react'
 
 import { getCaseImageUrl } from '@/src/lib/case-utils'
@@ -23,7 +30,7 @@ type CaseImageCarouselProps = {
   aspectClassName?: string
   imageClassName?: string
   sizes?: string
-  priority?: boolean
+  preload?: boolean
   showThumbnails?: boolean
   emptyText?: string
   className?: string
@@ -60,7 +67,7 @@ export function CaseImageCarousel({
   aspectClassName = 'aspect-[16/10]',
   imageClassName = 'object-cover',
   sizes = '100vw',
-  priority = false,
+  preload = false,
   showThumbnails = true,
   emptyText = 'ยังไม่มีรูปภาพสำหรับเคสนี้',
   className = '',
@@ -71,6 +78,10 @@ export function CaseImageCarousel({
   )
   const [activeIndex, setActiveIndex] = useState(0)
   const [lightboxOpen, setLightboxOpen] = useState(false)
+  const dialogRef = useRef<HTMLDialogElement>(null)
+  const triggerRef = useRef<HTMLButtonElement>(null)
+  const closeButtonRef = useRef<HTMLButtonElement>(null)
+  const dialogLabelId = useId()
   const hasMultipleImages = visibleImages.length > 1
   const safeActiveIndex =
     visibleImages.length === 0
@@ -96,28 +107,45 @@ export function CaseImageCarousel({
     })
   }, [visibleImages.length])
 
+  const closeLightbox = useCallback(() => {
+    const dialog = dialogRef.current
+
+    if (dialog?.open) {
+      dialog.close()
+      return
+    }
+
+    setLightboxOpen(false)
+  }, [])
+
   useEffect(() => {
     if (!lightboxOpen) return
 
     function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') {
-        setLightboxOpen(false)
-      }
-
       if (event.key === 'ArrowLeft') {
+        event.preventDefault()
         goToPrevious()
       }
 
       if (event.key === 'ArrowRight') {
+        event.preventDefault()
         goToNext()
       }
     }
 
+    const dialog = dialogRef.current
+    const previousOverflow = document.body.style.overflow
+
+    if (dialog && !dialog.open) {
+      dialog.showModal()
+    }
+
     document.body.style.overflow = 'hidden'
     window.addEventListener('keydown', handleKeyDown)
+    window.requestAnimationFrame(() => closeButtonRef.current?.focus())
 
     return () => {
-      document.body.style.overflow = ''
+      document.body.style.overflow = previousOverflow
       window.removeEventListener('keydown', handleKeyDown)
     }
   }, [goToNext, goToPrevious, lightboxOpen])
@@ -139,6 +167,7 @@ export function CaseImageCarousel({
       >
         <div className={`relative ${aspectClassName} bg-slate-100`}>
           <button
+            ref={triggerRef}
             type="button"
             onClick={() => setLightboxOpen(true)}
             className="group/image relative block h-full w-full overflow-hidden"
@@ -149,9 +178,8 @@ export function CaseImageCarousel({
               alt={activeImage.alt}
               fill
               sizes={sizes}
-              priority={priority}
-              loading={priority ? 'eager' : undefined}
-              className={`${imageClassName} transition duration-500 group-hover/image:scale-[1.02]`}
+              preload={preload && safeActiveIndex === 0}
+              className={`${imageClassName} transition duration-500 group-hover/image:scale-[1.02] motion-reduce:transition-none motion-reduce:group-hover/image:scale-100`}
             />
             <span className="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-slate-950/70 text-white opacity-0 backdrop-blur transition group-hover/image:opacity-100">
               <Expand className="h-4 w-4" />
@@ -222,17 +250,33 @@ export function CaseImageCarousel({
         ) : null}
       </div>
 
-      {lightboxOpen ? (
+      <dialog
+        ref={dialogRef}
+        aria-labelledby={dialogLabelId}
+        onCancel={(event) => {
+          event.preventDefault()
+          closeLightbox()
+        }}
+        onClose={() => {
+          setLightboxOpen(false)
+          triggerRef.current?.focus()
+        }}
+        className="fixed inset-0 m-0 h-full max-h-none w-full max-w-none border-0 bg-transparent p-0 backdrop:bg-slate-950/95"
+      >
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/95 p-4"
-          role="dialog"
-          aria-modal="true"
-          aria-label="ดูรูปภาพขนาดใหญ่"
+          className="relative flex min-h-full items-center justify-center p-4"
+          onClick={(event) => {
+            if (event.target === event.currentTarget) closeLightbox()
+          }}
         >
+          <h2 id={dialogLabelId} className="sr-only">
+            ดูรูปภาพขนาดใหญ่: {title}
+          </h2>
           <button
+            ref={closeButtonRef}
             type="button"
-            onClick={() => setLightboxOpen(false)}
-            className="absolute right-4 top-4 inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white ring-1 ring-white/20 transition hover:bg-white/20"
+            onClick={closeLightbox}
+            className="absolute right-4 top-4 z-10 inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white ring-1 ring-white/20 transition hover:bg-white/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             aria-label="ปิดรูปภาพขนาดใหญ่"
           >
             <X className="h-5 w-5" />
@@ -242,7 +286,7 @@ export function CaseImageCarousel({
             <button
               type="button"
               onClick={goToPrevious}
-              className="absolute left-4 top-1/2 inline-flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white ring-1 ring-white/20 transition hover:bg-white/20"
+              className="absolute left-4 top-1/2 z-10 inline-flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white ring-1 ring-white/20 transition hover:bg-white/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
               aria-label="รูปก่อนหน้า"
             >
               <ChevronLeft className="h-6 w-6" />
@@ -273,14 +317,14 @@ export function CaseImageCarousel({
             <button
               type="button"
               onClick={goToNext}
-              className="absolute right-4 top-1/2 inline-flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white ring-1 ring-white/20 transition hover:bg-white/20"
+              className="absolute right-4 top-1/2 z-10 inline-flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white ring-1 ring-white/20 transition hover:bg-white/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
               aria-label="รูปถัดไป"
             >
               <ChevronRight className="h-6 w-6" />
             </button>
           ) : null}
         </div>
-      ) : null}
+      </dialog>
     </>
   )
 }

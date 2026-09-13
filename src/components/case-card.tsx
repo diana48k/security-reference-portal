@@ -13,7 +13,7 @@ export function CaseCard({ caseStudy }: CaseCardProps) {
   const images = sortBySortOrder(caseStudy.case_images)
 
   return (
-    <article className="group overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl">
+    <article className="group overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl motion-reduce:hover:translate-y-0 motion-reduce:hover:shadow-sm">
       <div className="relative">
         <CaseImageCarousel
           images={images}

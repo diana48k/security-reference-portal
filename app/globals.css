@@ -31,16 +31,61 @@
   }
 }
 
-[data-hide-budget="true"] .presentation-budget {
-  display: none;
-}
-
 @media print {
-  body {
-    background: #ffffff;
+  @page {
+    size: 13.333in 7.5in;
+    margin: 0;
   }
 
-  .presentation-budget {
-    break-inside: avoid;
+  html,
+  body {
+    width: 13.333in;
+    min-width: 13.333in;
+    height: auto !important;
+    background: #020617;
+  }
+
+  .presentation-shell {
+    display: block !important;
+    height: auto !important;
+    min-height: auto;
+    overflow: visible;
+    background: #020617;
+  }
+
+  .presentation-toolbar,
+  .presentation-navigation {
+    display: none !important;
+  }
+
+  .presentation-stage {
+    display: block !important;
+    overflow: visible !important;
+    padding: 0 !important;
+  }
+
+  .presentation-slide {
+    display: flex !important;
+    width: 13.333in !important;
+    max-width: none !important;
+    height: 7.5in !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: hidden !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    break-after: page;
+    page-break-after: always;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .presentation-slide > div.relative.z-10 {
+    min-height: 0 !important;
+  }
+
+  .presentation-slide:last-child {
+    break-after: auto;
+    page-break-after: auto;
   }
 }

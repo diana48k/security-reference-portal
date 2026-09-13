@@ -19,8 +19,7 @@ export function BrandLogo({
           src="/brand/tigersoft-logo.png"
           alt="Tigersoft"
           fill
-          sizes="144px"
-          priority
+          sizes="44px"
           className="object-contain"
         />
       </div>

@@ -9,11 +9,11 @@ import {
   ChevronRight,
   Clipboard,
   Clock,
-  Download,
   FileText,
   HelpCircle,
   Layers,
   MapPin,
+  MonitorPlay,
   Network,
   Share2,
   Tags,
@@ -87,8 +87,6 @@ function GalleryPanel({
             alt={altText}
             fill
             sizes="(min-width: 1280px) 36vw, 100vw"
-            priority
-            loading="eager"
             className="object-cover"
           />
         ) : (
@@ -228,11 +226,15 @@ export function CaseDetailWorkspace({ caseDetail }: CaseDetailWorkspaceProps) {
   )
   const galleryImages = useMemo(
     () =>
-      sortBySortOrder(caseDetail.case_images).filter((image) =>
-        getCaseImageUrl(image),
+      sortBySortOrder(caseDetail.case_images).filter(
+        (image) => image.kind === 'gallery' && getCaseImageUrl(image),
       ),
     [caseDetail.case_images],
   )
+  const hasCaseImages =
+    beforeImages.length > 0 ||
+    afterImages.length > 0 ||
+    galleryImages.length > 0
 
   const lookups = dedupeLookups([
     caseDetail.categories,
@@ -265,14 +267,6 @@ export function CaseDetailWorkspace({ caseDetail }: CaseDetailWorkspaceProps) {
         'Could not copy the link. Please copy the URL from the address bar.',
       )
     }
-  }
-
-  function shareToCustomer() {
-    window.open(
-      `/cases/${caseDetail.slug}/present`,
-      '_blank',
-      'noopener,noreferrer',
-    )
   }
 
   return (
@@ -373,14 +367,15 @@ export function CaseDetailWorkspace({ caseDetail }: CaseDetailWorkspaceProps) {
               <Share2 className="h-4 w-4" />
               {copied ? 'คัดลอกแล้ว' : 'แชร์ให้ลูกค้า'}
             </button>
-            <button
-              type="button"
-              onClick={shareToCustomer}
+            <Link
+              href={`/cases/${caseDetail.slug}/present`}
+              target="_blank"
+              rel="noreferrer"
               className="inline-flex h-11 items-center gap-2 rounded-xl bg-blue-700 px-4 text-sm font-bold text-white shadow-sm transition hover:bg-blue-800"
             >
-              <Download className="h-4 w-4" />
-              ดาวน์โหลดสรุป (PDF)
-            </button>
+              <MonitorPlay className="h-4 w-4" />
+              Present
+            </Link>
             {copyError ? (
               <p
                 className="basis-full text-sm font-semibold text-red-600"
@@ -395,59 +390,44 @@ export function CaseDetailWorkspace({ caseDetail }: CaseDetailWorkspaceProps) {
 
       <section className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
         <div className="min-w-0 space-y-6">
-          <div className="grid gap-4 lg:grid-cols-2">
-            <GalleryPanel
-              image={beforeImages[0]}
-              title={caseDetail.title}
-              label="ก่อนติดตั้ง"
-            />
-            <GalleryPanel
-              image={afterImages[0]}
-              title={caseDetail.title}
-              label="หลังติดตั้ง"
-            />
-          </div>
-
-          <CaseImageCarousel
-            images={galleryImages}
-            title={caseDetail.title}
-            label="รูปภาพทั้งหมด"
-            sizes="(min-width: 1280px) 62vw, 100vw"
-            priority
-            emptyText="ยังไม่มีรูปภาพสำหรับเคสนี้"
-          />
-
-          {galleryImages.length > 0 ? (
-            <div className="flex gap-3 overflow-x-auto pb-1">
-              {galleryImages.slice(0, 5).map((image) => {
-                const imageUrl = getCaseImageUrl(image)
-
-                if (!imageUrl) return null
-
-                return (
-                  <div
-                    key={image.id}
-                    className="relative h-20 w-36 shrink-0 overflow-hidden rounded-xl border border-slate-200 bg-slate-100"
-                  >
-                    <Image
-                      src={imageUrl}
-                      alt={image.alt_text ?? image.caption ?? caseDetail.title}
-                      fill
-                      sizes="144px"
-                      className="object-cover"
-                    />
-                  </div>
-                )
-              })}
-              {galleryImages.length > 5 ? (
-                <div className="flex h-20 w-32 shrink-0 flex-col items-center justify-center rounded-xl border border-slate-200 bg-white text-sm font-bold text-slate-700">
-                  +{galleryImages.length - 5}
-                  <span className="text-xs font-medium text-slate-500">
-                    รูปทั้งหมด
-                  </span>
-                </div>
+          {beforeImages.length > 0 || afterImages.length > 0 ? (
+            <div className="grid gap-4 lg:grid-cols-2">
+              {beforeImages.length > 0 ? (
+                <CaseImageCarousel
+                  images={beforeImages}
+                  title={caseDetail.title}
+                  label="ก่อนติดตั้ง"
+                  sizes="(min-width: 1280px) 31vw, (min-width: 1024px) 50vw, 100vw"
+                  preload
+                />
+              ) : null}
+              {afterImages.length > 0 ? (
+                <CaseImageCarousel
+                  images={afterImages}
+                  title={caseDetail.title}
+                  label="หลังติดตั้ง"
+                  sizes="(min-width: 1280px) 31vw, (min-width: 1024px) 50vw, 100vw"
+                  preload={beforeImages.length === 0}
+                />
               ) : null}
             </div>
+          ) : null}
+
+          {galleryImages.length > 0 ? (
+            <CaseImageCarousel
+              images={galleryImages}
+              title={caseDetail.title}
+              label="ภาพเพิ่มเติม"
+              sizes="(min-width: 1280px) 62vw, 100vw"
+              preload={beforeImages.length === 0 && afterImages.length === 0}
+            />
+          ) : null}
+
+          {!hasCaseImages ? (
+            <EmptyBlock
+              title="ยังไม่มีรูปภาพสำหรับเคสนี้"
+              text="ทีมเทคนิคสามารถเพิ่มรูปก่อนติดตั้ง หลังติดตั้ง หรือภาพแกลเลอรีจากหน้า Admin ได้"
+            />
           ) : null}
 
           <section className="rounded-3xl border border-slate-200 bg-white shadow-sm">

@@ -5,6 +5,7 @@ import { useState, useTransition } from 'react'
 import { Star } from 'lucide-react'
 
 import { toggleFavoriteAction } from '@/src/lib/actions/case-activity'
+import { trackAnalytics } from '@/src/lib/analytics/client'
 
 type FavoriteCaseButtonProps = {
   caseId: string
@@ -52,6 +53,7 @@ export function FavoriteCaseButton({
                 slug,
                 nextFavorite,
               })
+              trackAnalytics('favorite_toggle', { entityType: 'case', entityId: caseId, metadata: { favorited: nextFavorite } })
             } catch (error) {
               setFavorite(!nextFavorite)
               setErrorMessage(

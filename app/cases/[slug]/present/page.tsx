@@ -53,7 +53,7 @@ export default async function CasePresentationPage({ params }: PresentationPageP
             </Link>
             <BrandLogo tone="light" />
           </div>
-          <PresentationActions title={caseDetail.title} />
+          <PresentationActions title={caseDetail.title} caseId={caseDetail.id} />
         </div>
 
         <section className="grid flex-1 items-center gap-10 py-12 lg:grid-cols-[1.1fr_0.9fr]">

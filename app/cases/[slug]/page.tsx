@@ -35,7 +35,13 @@ export default async function CaseDetailPage({ params }: CaseDetailPageProps) {
   }
 
   return (
-    <PortalShell>
+    <PortalShell
+      visitorCounter={{
+        caseId: caseDetail.id,
+        slug: caseDetail.slug,
+        viewCount: caseDetail.view_count,
+      }}
+    >
       <CaseDetailWorkspace caseDetail={caseDetail} />
     </PortalShell>
   )

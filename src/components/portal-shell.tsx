@@ -1,38 +1,22 @@
-'use client'
-
-import { useState } from 'react'
-
-import { PortalSidebar } from '@/src/components/portal-sidebar'
-import { PortalTopbar, type PortalUser } from '@/src/components/portal-topbar'
+import { PortalShellClient } from '@/src/components/portal-shell-client'
+import type { PortalVisitorCounter } from '@/src/components/portal-sidebar'
+import { getOptionalPortalUser } from '@/src/lib/queries/auth'
+import { getRecentNotifications } from '@/src/lib/queries/notifications'
+import type { PortalUser } from '@/src/types/application'
 
 type PortalShellProps = {
   children: React.ReactNode
   user?: PortalUser | null
+  visitorCounter?: PortalVisitorCounter | null
 }
 
-export function PortalShell({ children, user }: PortalShellProps) {
-  const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
-  const isAdmin = user?.role === 'admin' || user?.role === 'tech'
+export async function PortalShell({ children, user, visitorCounter }: PortalShellProps) {
+  const resolvedUser = user === undefined ? await getOptionalPortalUser() : user
+  const notifications = resolvedUser ? await getRecentNotifications(resolvedUser.id) : []
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-950">
-      <div className="flex min-h-screen">
-        <PortalSidebar
-          isOpen={sidebarOpen}
-          onClose={() => setSidebarOpen(false)}
-          isAdmin={isAdmin}
-          isCollapsed={sidebarCollapsed}
-          onToggleCollapse={() => setSidebarCollapsed((value) => !value)}
-        />
-        <div className="min-w-0 flex-1">
-          <PortalTopbar
-            onMenuClick={() => setSidebarOpen(true)}
-            user={user}
-          />
-          <main className="px-4 py-6 lg:px-8 lg:py-8">{children}</main>
-        </div>
-      </div>
-    </div>
+    <PortalShellClient user={resolvedUser} visitorCounter={visitorCounter} notifications={notifications}>
+      {children}
+    </PortalShellClient>
   )
 }

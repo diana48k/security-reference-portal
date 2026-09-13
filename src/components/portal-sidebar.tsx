@@ -28,6 +28,13 @@ import {
 } from 'lucide-react'
 
 import { BrandLogo } from '@/src/components/brand-logo'
+import { CaseVisitorCounter } from '@/src/components/case-visitor-counter'
+
+export type PortalVisitorCounter = {
+  caseId: string
+  slug: string
+  viewCount: number | null
+}
 
 type PortalSidebarProps = {
   isOpen: boolean
@@ -35,6 +42,7 @@ type PortalSidebarProps = {
   isCollapsed: boolean
   onToggleCollapse: () => void
   isAdmin?: boolean
+  visitorCounter?: PortalVisitorCounter | null
 }
 
 type NavItem = {
@@ -133,6 +141,7 @@ export function PortalSidebar({
   isCollapsed,
   onToggleCollapse,
   isAdmin,
+  visitorCounter,
 }: PortalSidebarProps) {
   const pathname = usePathname()
 
@@ -230,6 +239,15 @@ export function PortalSidebar({
             </div>
           ) : null}
         </nav>
+
+        {visitorCounter ? (
+          <CaseVisitorCounter
+            caseId={visitorCounter.caseId}
+            slug={visitorCounter.slug}
+            initialViewCount={visitorCounter.viewCount}
+            isCollapsed={isCollapsed}
+          />
+        ) : null}
 
         <div className={`space-y-4 border-t border-white/10 p-5 ${isCollapsed ? 'lg:hidden' : ''}`}>
           <div className="rounded-2xl border border-blue-400/20 bg-blue-500/10 p-4">

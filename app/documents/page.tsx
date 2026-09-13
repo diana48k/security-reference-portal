@@ -112,7 +112,7 @@ function DocumentCard({ document }: { document: PortalDocument }) {
         <span>เพิ่มเมื่อ {formatThaiDate(document.created_at)}</span>
         {url ? (
           <a
-            href={url}
+            href={`/api/documents/${document.id}/download`}
             target="_blank"
             rel="noreferrer"
             className="inline-flex h-10 items-center gap-2 rounded-xl bg-slate-950 px-3 text-sm font-bold text-white transition hover:bg-slate-800"

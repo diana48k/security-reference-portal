@@ -1,11 +1,14 @@
 import { redirect } from 'next/navigation'
 
 import { createSupabaseServerClient } from '@/src/lib/supabase/server'
+import type { UserRole } from '@/src/types/application'
 
 export type AdminProfile = {
   id: string
   full_name: string | null
-  role: string | null
+  role: UserRole | null
+  is_active: boolean
+  must_change_password: boolean
 }
 
 export type AdminDashboardStats = {
@@ -30,14 +33,18 @@ export async function getCurrentAdminUser() {
 
   const { data, error: profileError } = await supabase
     .from('profiles')
-    .select('id, full_name, role')
+    .select('id, full_name, role, is_active, must_change_password')
     .eq('id', user.id)
     .maybeSingle()
 
   const profile = data as AdminProfile | null
 
-  if (profileError || !profile) {
+  if (profileError || !profile || !profile.is_active) {
     redirect('/')
+  }
+
+  if (profile.must_change_password) {
+    redirect('/account/change-password?required=1')
   }
 
   if (!profile.role || !['admin', 'tech'].includes(profile.role)) {

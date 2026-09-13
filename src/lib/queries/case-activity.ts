@@ -7,6 +7,7 @@ import {
   type RawHomeCase,
 } from '@/src/lib/queries/home'
 import { createSupabaseServerClient } from '@/src/lib/supabase/server'
+import { getRequiredActiveUser } from '@/src/lib/queries/auth'
 
 export type FavoriteCase = {
   favoritedAt: string
@@ -35,16 +36,12 @@ function firstRelation<T>(relation: T | T[] | null): T | null {
 }
 
 async function getRequiredUserId(nextPath: string) {
-  const supabase = await createSupabaseServerClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
+  try {
+    const { user } = await getRequiredActiveUser()
+    return user.id
+  } catch {
     redirect(`/login?next=${encodeURIComponent(nextPath)}`)
   }
-
-  return user.id
 }
 
 export async function getFavoriteCases(): Promise<FavoriteCase[]> {

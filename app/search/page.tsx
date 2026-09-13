@@ -4,6 +4,7 @@ import { Search } from 'lucide-react'
 import { CaseCard } from '@/src/components/case-card'
 import { PortalShell } from '@/src/components/portal-shell'
 import { SearchFilterForm } from '@/src/components/search-filter-form'
+import { SearchAnalytics } from '@/src/components/search-analytics'
 import {
   getSearchPageData,
   type SearchParamsInput,
@@ -24,6 +25,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
   return (
     <PortalShell>
+      <SearchAnalytics term={String(data.filters.q ?? '')} resultCount={data.cases.length} />
       <div className="mx-auto max-w-[1500px] space-y-6">
         <section className="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm lg:p-8">
           <div className="flex max-w-4xl items-start gap-4">

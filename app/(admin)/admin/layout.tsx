@@ -11,6 +11,7 @@ export default async function AdminLayout({
   return (
     <PortalShell
       user={{
+        id: user.id,
         fullName: profile.full_name,
         email: user.email,
         role: profile.role,

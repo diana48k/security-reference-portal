@@ -1,36 +1,29 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Tigersoft Installation Reference Portal
 
-## Getting Started
+Next.js 16 + Supabase portal สำหรับคลังเคส เอกสาร การจัดการผู้ใช้ การแจ้งเตือน และ first-party analytics
 
-First, run the development server:
+## Setup
+
+1. คัดลอก `.env.example` เป็น `.env.local` และกรอกค่าจริง ห้ามนำ `SUPABASE_SERVICE_ROLE_KEY` หรือ `ANALYTICS_HASH_SECRET` ไปใช้ใน Client Component
+2. เชื่อม Supabase CLI แล้วใช้ `npx supabase db push` เพื่อรัน migrations ใน `supabase/migrations`
+3. ตั้ง Supabase Auth Site URL เป็นค่าเดียวกับ `SITE_URL` และเพิ่ม Redirect URL `${SITE_URL}/auth/callback`
+4. รัน `npm run dev`
+
+ระบบอีเมลเริ่มต้นของ Supabase เหมาะกับการทดสอบหรือปริมาณต่ำ หากใช้งาน production ให้ตั้ง Corporate SMTP ใน Supabase Dashboard โดย flow ของแอปไม่ต้องเปลี่ยน
+
+## Commands
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run lint
+npx tsc --noEmit
+npm run build
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Security and privacy
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- หน้าเนื้อหาเป็น public; Favorites, Recent, Notifications และ Admin ต้อง Login
+- Admin/Tech มีสิทธิ์หลังบ้านเท่ากัน และ service-role ถูกเรียกจาก server เท่านั้น
+- Analytics ใช้ HttpOnly visitor/session cookies ไม่เก็บ IP, fingerprint หรือ raw user-agent
+- Raw analytics เก็บ 90 วัน และ cron rollup ทำงานตามวันเวลา `Asia/Bangkok`
+- KPI ใหม่เริ่มนับเมื่อ deploy migration; `case_studies.view_count` ยังเป็น legacy-compatible counter

@@ -10,7 +10,6 @@ import {
   Clipboard,
   Clock,
   Download,
-  Eye,
   FileText,
   HelpCircle,
   Layers,
@@ -166,7 +165,7 @@ function DocumentsList({ documents }: { documents: CaseDetailDocument[] }) {
         return (
           <a
             key={document.id}
-            href={url}
+            href={`/api/documents/${document.id}/download`}
             target="_blank"
             rel="noreferrer"
             className="group rounded-2xl border border-slate-200 bg-slate-50 p-4 transition hover:border-blue-200 hover:bg-blue-50/40"
@@ -592,10 +591,6 @@ export function CaseDetailWorkspace({ caseDetail }: CaseDetailWorkspaceProps) {
               canFeedback={caseDetail.can_feedback}
             />
             <div className="flex flex-wrap gap-5">
-              <span className="inline-flex items-center gap-2">
-                <Eye className="h-4 w-4" />
-                เปิดดู: {(caseDetail.view_count ?? 0).toLocaleString('th-TH')} ครั้ง
-              </span>
               <span>โดย: ทีมเทคนิค</span>
             </div>
           </div>

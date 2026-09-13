@@ -2,12 +2,14 @@
 
 import { Clipboard, Download, EyeOff, Eye } from 'lucide-react'
 import { useState } from 'react'
+import { trackAnalytics } from '@/src/lib/analytics/client'
 
 type PresentationActionsProps = {
   title: string
+  caseId: string
 }
 
-export function PresentationActions({ title }: PresentationActionsProps) {
+export function PresentationActions({ title, caseId }: PresentationActionsProps) {
   const [copied, setCopied] = useState(false)
   const [hideBudget, setHideBudget] = useState(false)
   const [copyError, setCopyError] = useState<string | null>(null)
@@ -31,6 +33,7 @@ export function PresentationActions({ title }: PresentationActionsProps) {
   }
 
   function downloadPdf() {
+    trackAnalytics('presentation_export', { entityType: 'case', entityId: caseId, metadata: { format: 'pdf' } })
     window.print()
   }
 

@@ -1,134 +1,33 @@
 import Link from 'next/link'
-import {
-  ArrowRight,
-  FileText,
-  FolderKanban,
-  HelpCircle,
-  Plus,
-  Tags,
-} from 'lucide-react'
+import { Activity, Download, Eye, FileOutput, Gauge, Search, Users } from 'lucide-react'
 
 import { getAdminDashboardStats } from '@/src/lib/queries/admin'
+import { getAdminDashboardMetrics, resolveAnalyticsRange } from '@/src/lib/queries/analytics'
+import type { AnalyticsRankingItem, AnalyticsTrendPoint } from '@/src/types/application'
 
-const statLabels = [
-  {
-    key: 'totalCases',
-    label: 'เคสทั้งหมด',
-    icon: FolderKanban,
-  },
-  {
-    key: 'publishedCases',
-    label: 'เผยแพร่แล้ว',
-    icon: FileText,
-  },
-  {
-    key: 'draftCases',
-    label: 'ฉบับร่าง',
-    icon: FileText,
-  },
-  {
-    key: 'categories',
-    label: 'หมวดระบบ',
-    icon: Tags,
-  },
-  {
-    key: 'faqs',
-    label: 'คำถาม FAQ',
-    icon: HelpCircle,
-  },
-] as const
+export const metadata = { title: 'แดชบอร์ดผู้ดูแล' }
 
-const quickLinks = [
-  {
-    href: '/admin/cases/new',
-    label: 'เพิ่มเคสใหม่',
-    icon: Plus,
-  },
-  {
-    href: '/admin/cases',
-    label: 'จัดการเคส',
-    icon: FolderKanban,
-  },
-  {
-    href: '/admin/taxonomy',
-    label: 'จัดการหมวดระบบ',
-    icon: Tags,
-  },
-  {
-    href: '/admin/faqs',
-    label: 'จัดการ FAQ',
-    icon: HelpCircle,
-  },
-]
+export default async function AdminDashboardPage({ searchParams }: { searchParams: Promise<{ range?: string; start?: string; end?: string }> }) {
+  const range = resolveAnalyticsRange(await searchParams)
+  const [content, metrics] = await Promise.all([getAdminDashboardStats(), getAdminDashboardMetrics(range)])
+  const cards = [
+    ['ผู้เข้าชมทั้งหมด', metrics.visitors, Users], ['ผู้เข้าชมวันนี้', metrics.visitorsToday, Activity], ['Sessions', metrics.sessions, Gauge], ['Page views', metrics.pageViews, Eye], ['Pages / session', metrics.pagesPerSession.toFixed(2), Gauge], ['Downloads', metrics.downloads, Download], ['Presentation exports', metrics.presentationExports, FileOutput], ['ผู้ใช้ Login ที่ active', metrics.activeUsers, Users],
+  ] as const
 
-export const metadata = {
-  title: 'แดชบอร์ดผู้ดูแล',
+  return <div className="space-y-8">
+    <section className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between"><div><p className="text-sm font-semibold uppercase tracking-wide text-blue-700">Analytics • Asia/Bangkok</p><h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-950">ภาพรวมพฤติกรรมผู้ใช้</h1><p className="mt-3 text-slate-600">ข้อมูล first-party ไม่เก็บ IP, fingerprint หรือ raw user-agent</p></div><RangeFilter range={range} /></section>
+    {!metrics.configured ? <section className="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm leading-6 text-amber-900"><strong>Analytics ยังไม่เปิดใช้งาน</strong><br />ตั้งค่า <code>SUPABASE_SERVICE_ROLE_KEY</code> และ <code>ANALYTICS_HASH_SECRET</code> แล้วรัน migrations เพื่อเริ่มเก็บข้อมูลจริง</section> : null}
+    <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{cards.map(([label, value, Icon]) => <div key={label} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><div className="flex items-center justify-between"><span className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-700"><Icon className="h-5 w-5" /></span><strong className="text-2xl text-slate-950">{typeof value === 'number' ? value.toLocaleString('th-TH') : value}</strong></div><p className="mt-4 text-sm font-semibold text-slate-600">{label}</p></div>)}</section>
+    <section className="grid gap-4 md:grid-cols-4"><Kpi label="Returning visitor rate" value={`${metrics.returningVisitorRate.toFixed(1)}%`} /><Kpi label="เวลาใช้งานเฉลี่ย" value={`${metrics.averageSessionMinutes.toFixed(1)} นาที`} /><Kpi label="No-result search rate" value={`${metrics.noResultRate.toFixed(1)}%`} /><Kpi label="Useful feedback" value={`${metrics.usefulFeedbackRate.toFixed(1)}%`} /></section>
+    <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><div className="flex items-center justify-between"><div><h2 className="text-xl font-bold text-slate-950">ผู้เข้าชมและ Page views รายวัน</h2><p className="mt-1 text-sm text-slate-500">{range.start} – {range.end}</p></div></div><TrendChart points={metrics.trend} /></section>
+    <section className="grid gap-5 xl:grid-cols-2"><Ranking title="หน้ายอดนิยม" items={metrics.topPages} /><Ranking title="เคสยอดนิยม" items={metrics.topCases} /><Ranking title="เอกสารยอดดาวน์โหลด" items={metrics.topDocuments} /><Ranking title="คำค้นหายอดนิยม" items={metrics.topSearches} /></section>
+    <section className="grid gap-4 sm:grid-cols-3"><Kpi label="Search events" value={metrics.searches.toLocaleString('th-TH')} icon={Search} /><Kpi label="Favorite changes" value={metrics.favoriteToggles.toLocaleString('th-TH')} /><Kpi label="เนื้อหาในระบบ" value={`${content.publishedCases}/${content.totalCases} เคสเผยแพร่`} /></section>
+    <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"><div className="border-b border-slate-200 p-5"><h2 className="text-xl font-bold text-slate-950">กิจกรรมผู้ใช้ที่ Login</h2><p className="mt-1 text-sm text-slate-500">แสดงแบบสรุป ไม่มี timeline ราย event</p></div><div className="overflow-x-auto"><table className="w-full min-w-[760px] text-left text-sm"><thead className="bg-slate-50 text-slate-500"><tr><th className="px-5 py-3">ผู้ใช้</th><th className="px-5 py-3">Sessions</th><th className="px-5 py-3">Pages</th><th className="px-5 py-3">Downloads</th><th className="px-5 py-3">ล่าสุด</th></tr></thead><tbody className="divide-y divide-slate-100">{metrics.userActivity.map((user) => <tr key={user.userId}><td className="px-5 py-4"><strong className="text-slate-900">{user.fullName ?? 'ไม่ระบุชื่อ'}</strong><div className="text-xs text-slate-500">{user.email}</div></td><td className="px-5 py-4">{user.sessions}</td><td className="px-5 py-4">{user.pageViews}</td><td className="px-5 py-4">{user.downloads}</td><td className="px-5 py-4 text-slate-500">{user.lastActivityAt ? new Intl.DateTimeFormat('th-TH', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Asia/Bangkok' }).format(new Date(user.lastActivityAt)) : '—'}</td></tr>)}{metrics.userActivity.length === 0 ? <tr><td colSpan={5} className="p-10 text-center text-slate-500">ยังไม่มีกิจกรรมผู้ใช้ในช่วงนี้</td></tr> : null}</tbody></table></div></section>
+    <div className="flex flex-wrap gap-3"><Link href="/admin/users" className="rounded-xl bg-slate-950 px-4 py-2 text-sm font-bold text-white">จัดการผู้ใช้</Link><Link href="/admin/cases" className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-bold text-slate-700">จัดการเคส</Link></div>
+  </div>
 }
 
-export default async function AdminDashboardPage() {
-  const stats = await getAdminDashboardStats()
-
-  return (
-    <div className="space-y-8">
-      <section>
-        <p className="text-sm font-semibold uppercase tracking-wide text-slate-500">
-          ผู้ดูแลระบบ
-        </p>
-        <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-950">
-          แดชบอร์ด
-        </h1>
-        <p className="mt-3 max-w-2xl text-slate-600">
-          ภาพรวมข้อมูลเคส หมวดระบบ และเนื้อหาสนับสนุนทีมขาย
-        </p>
-      </section>
-
-      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-        {statLabels.map((item) => {
-          const Icon = item.icon
-
-          return (
-            <div
-              key={item.key}
-              className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
-            >
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-950 text-white">
-                  <Icon className="h-5 w-5" />
-                </div>
-                <div className="text-2xl font-bold text-slate-950">
-                  {stats[item.key].toLocaleString('en-US')}
-                </div>
-              </div>
-              <div className="mt-4 text-sm font-semibold text-slate-600">
-                {item.label}
-              </div>
-            </div>
-          )
-        })}
-      </section>
-
-      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-xl font-bold text-slate-950">เมนูลัด</h2>
-        <div className="mt-5 grid gap-3 md:grid-cols-2">
-          {quickLinks.map((item) => {
-            const Icon = item.icon
-
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="group flex items-center justify-between gap-4 rounded-xl border border-slate-200 p-4 transition hover:border-slate-300 hover:bg-slate-50"
-              >
-                <span className="flex items-center gap-3 font-semibold text-slate-800">
-                  <Icon className="h-5 w-5 text-slate-500" />
-                  {item.label}
-                </span>
-                <ArrowRight className="h-4 w-4 text-slate-400 transition group-hover:translate-x-1 group-hover:text-slate-950" />
-              </Link>
-            )
-          })}
-        </div>
-      </section>
-    </div>
-  )
-}
+function RangeFilter({ range }: { range: { start: string; end: string; days: number } }) { return <form className="flex flex-wrap items-end gap-2 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm"><label className="text-xs font-semibold text-slate-600">ช่วง<select name="range" defaultValue={String(range.days)} className="mt-1 block h-9 rounded-lg border border-slate-300 px-2"><option value="7">7 วัน</option><option value="30">30 วัน</option><option value="90">90 วัน</option><option value="custom">กำหนดเอง</option></select></label><label className="text-xs font-semibold text-slate-600">เริ่ม<input type="date" name="start" defaultValue={range.start} className="mt-1 block h-9 rounded-lg border border-slate-300 px-2" /></label><label className="text-xs font-semibold text-slate-600">สิ้นสุด<input type="date" name="end" defaultValue={range.end} className="mt-1 block h-9 rounded-lg border border-slate-300 px-2" /></label><button className="h-9 rounded-lg bg-blue-700 px-4 text-sm font-bold text-white">แสดงผล</button></form> }
+function Kpi({ label, value, icon: Icon }: { label: string; value: string; icon?: typeof Search }) { return <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">{Icon ? <Icon className="mb-3 h-5 w-5 text-blue-700" /> : null}<p className="text-sm font-semibold text-slate-500">{label}</p><p className="mt-2 text-2xl font-bold text-slate-950">{value}</p></div> }
+function Ranking({ title, items }: { title: string; items: AnalyticsRankingItem[] }) { const max = Math.max(1, ...items.map((item) => item.value)); return <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><h2 className="font-bold text-slate-950">{title}</h2><div className="mt-4 space-y-3">{items.map((item) => <div key={item.key}><div className="flex justify-between gap-4 text-sm"><span className="truncate text-slate-700">{item.label}</span><strong>{item.value}</strong></div><div className="mt-1 h-1.5 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full bg-blue-600" style={{ width: `${item.value / max * 100}%` }} /></div></div>)}{items.length === 0 ? <p className="py-6 text-center text-sm text-slate-500">ยังไม่มีข้อมูล</p> : null}</div></div> }
+function TrendChart({ points }: { points: AnalyticsTrendPoint[] }) { if (!points.length) return <div className="mt-5 flex h-64 items-center justify-center rounded-xl bg-slate-50 text-sm text-slate-500">ยังไม่มีข้อมูลกราฟ</div>; const max = Math.max(1, ...points.flatMap((point) => [point.visitors, point.pageViews])); const coords = (key: 'visitors' | 'pageViews') => points.map((point, index) => `${points.length === 1 ? 50 : index / (points.length - 1) * 100},${100 - point[key] / max * 88}`).join(' '); return <div className="mt-5"><svg viewBox="0 0 100 105" preserveAspectRatio="none" className="h-64 w-full overflow-visible rounded-xl bg-slate-50 p-3" role="img" aria-label="กราฟผู้เข้าชมและ page views"><polyline points={coords('pageViews')} fill="none" stroke="#2563eb" strokeWidth="1.4" vectorEffect="non-scaling-stroke" /><polyline points={coords('visitors')} fill="none" stroke="#10b981" strokeWidth="1.4" vectorEffect="non-scaling-stroke" /></svg><div className="mt-3 flex gap-5 text-xs font-semibold"><span className="text-blue-700">— Page views</span><span className="text-emerald-700">— Visitors</span></div></div> }

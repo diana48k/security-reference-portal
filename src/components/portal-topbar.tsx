@@ -1,22 +1,19 @@
 'use client'
 
 import Link from 'next/link'
-import { Bell, HelpCircle, LogIn, Menu, Search, Slash } from 'lucide-react'
+import { HelpCircle, LogIn, Menu, Search, Slash } from 'lucide-react'
 
 import { LogoutButton } from '@/src/components/logout-button'
-
-export type PortalUser = {
-  fullName?: string | null
-  email?: string | null
-  role?: string | null
-}
+import { NotificationBell } from '@/src/components/notification-bell'
+import type { PortalNotification, PortalUser } from '@/src/types/application'
 
 type PortalTopbarProps = {
   onMenuClick: () => void
   user?: PortalUser | null
+  notifications?: PortalNotification[]
 }
 
-export function PortalTopbar({ onMenuClick, user }: PortalTopbarProps) {
+export function PortalTopbar({ onMenuClick, user, notifications = [] }: PortalTopbarProps) {
   const displayName = user?.fullName ?? user?.email ?? 'ผู้ใช้งาน'
   const roleLabel = user?.role === 'admin' ? 'ผู้ดูแลระบบ' : user?.role === 'tech' ? 'ทีมเทคนิค' : 'ฝ่ายขาย'
 
@@ -54,15 +51,9 @@ export function PortalTopbar({ onMenuClick, user }: PortalTopbarProps) {
             <HelpCircle className="h-5 w-5" />
             ช่วยเหลือ
           </Link>
-          <button
-            type="button"
-            className="relative inline-flex h-10 w-10 items-center justify-center rounded-xl text-slate-700 transition hover:bg-slate-100"
-            aria-label="การแจ้งเตือน"
-          >
-            <Bell className="h-5 w-5" />
-            <span className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-white" />
-          </button>
         </div>
+
+        <NotificationBell user={user} initialNotifications={notifications} />
 
         <div className="hidden items-center gap-3 border-l border-slate-200 pl-4 sm:flex">
           {user ? (
@@ -84,7 +75,7 @@ export function PortalTopbar({ onMenuClick, user }: PortalTopbarProps) {
               className="inline-flex h-10 items-center gap-2 rounded-xl border border-slate-200 px-3 text-sm font-bold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
             >
               <LogIn className="h-4 w-4" />
-              เข้าระบบผู้ดูแล
+              เข้าสู่ระบบ
             </Link>
           )}
         </div>

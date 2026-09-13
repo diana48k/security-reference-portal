@@ -1,104 +1,46 @@
 'use client'
 
-import { useState, type FormEvent } from 'react'
-import { Lock, LogIn, Mail } from 'lucide-react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import Link from 'next/link'
+import { useActionState, useState } from 'react'
+import { Eye, EyeOff, LoaderCircle, Lock, LogIn, Mail } from 'lucide-react'
 
-import { createClient } from '@/src/lib/supabase/client'
+import { loginAction, type AuthActionState } from '@/src/lib/actions/auth'
 
-export function LoginForm() {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const nextParam = searchParams.get('next')
-  const next =
-    nextParam && nextParam.startsWith('/') && !nextParam.startsWith('//')
-      ? nextParam
-      : '/admin'
-  const [errorMessage, setErrorMessage] = useState<string | null>(null)
-  const [isSubmitting, setIsSubmitting] = useState(false)
+const initialState: AuthActionState = {}
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    setErrorMessage(null)
-    setIsSubmitting(true)
-
-    const formData = new FormData(event.currentTarget)
-    const email = String(formData.get('email') ?? '')
-    const password = String(formData.get('password') ?? '')
-
-    const supabase = createClient()
-    const { error } = await supabase.auth
-      .signInWithPassword({
-        email,
-        password,
-      })
-      .catch((error: Error) => ({ error }))
-
-    setIsSubmitting(false)
-
-    if (error) {
-      setErrorMessage(error.message || 'Could not sign in. Please try again.')
-      return
-    }
-
-    router.replace(next)
-    router.refresh()
-  }
+export function LoginForm({ next = '/admin' }: { next?: string }) {
+  const [state, action, pending] = useActionState(loginAction, initialState)
+  const [showPassword, setShowPassword] = useState(false)
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
+    <form action={action} className="space-y-5">
+      <input type="hidden" name="next" value={next} />
       <div>
-        <label htmlFor="email" className="text-sm font-semibold text-slate-700">
-          อีเมล
-        </label>
-        <div className="mt-2 flex items-center gap-3 rounded-xl border border-slate-300 bg-white px-4 focus-within:border-slate-950">
-          <Mail className="h-5 w-5 text-slate-400" />
-          <input
-            id="email"
-            name="email"
-            type="email"
-            autoComplete="email"
-            required
-            className="h-12 w-full bg-transparent text-slate-950 outline-none placeholder:text-slate-400"
-            placeholder="admin@example.com"
-          />
+        <label htmlFor="email" className="text-sm font-semibold text-slate-700">อีเมล</label>
+        <div className="mt-2 flex items-center gap-3 rounded-xl border border-slate-300 bg-white px-4 transition focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-100">
+          <Mail className="h-5 w-5 text-slate-400" aria-hidden="true" />
+          <input id="email" name="email" type="email" autoComplete="email" required autoFocus className="h-12 w-full bg-transparent text-slate-950 outline-none placeholder:text-slate-400" placeholder="name@company.com" />
         </div>
       </div>
 
       <div>
-        <label
-          htmlFor="password"
-          className="text-sm font-semibold text-slate-700"
-        >
-          รหัสผ่าน
-        </label>
-        <div className="mt-2 flex items-center gap-3 rounded-xl border border-slate-300 bg-white px-4 focus-within:border-slate-950">
-          <Lock className="h-5 w-5 text-slate-400" />
-          <input
-            id="password"
-            name="password"
-            type="password"
-            autoComplete="current-password"
-            required
-            className="h-12 w-full bg-transparent text-slate-950 outline-none placeholder:text-slate-400"
-            placeholder="กรอกรหัสผ่าน"
-          />
+        <div className="flex items-center justify-between gap-3">
+          <label htmlFor="password" className="text-sm font-semibold text-slate-700">รหัสผ่าน</label>
+          <Link href="/forgot-password" className="text-sm font-semibold text-blue-700 hover:text-blue-900 hover:underline">ลืมรหัสผ่าน?</Link>
+        </div>
+        <div className="mt-2 flex items-center gap-3 rounded-xl border border-slate-300 bg-white pl-4 pr-2 transition focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-100">
+          <Lock className="h-5 w-5 text-slate-400" aria-hidden="true" />
+          <input id="password" name="password" type={showPassword ? 'text' : 'password'} autoComplete="current-password" required className="h-12 min-w-0 flex-1 bg-transparent text-slate-950 outline-none placeholder:text-slate-400" placeholder="กรอกรหัสผ่าน" />
+          <button type="button" onClick={() => setShowPassword((value) => !value)} className="inline-flex h-10 w-10 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-800" aria-label={showPassword ? 'ซ่อนรหัสผ่าน' : 'แสดงรหัสผ่าน'}>
+            {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+          </button>
         </div>
       </div>
 
-      {errorMessage ? (
-        <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-          {errorMessage}
-        </p>
-      ) : null}
-
-      <button
-        type="submit"
-        disabled={isSubmitting}
-        className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-slate-950 px-5 font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-400"
-      >
-        <LogIn className="h-5 w-5" />
-        {isSubmitting ? 'กำลังเข้าสู่ระบบ...' : 'เข้าสู่ระบบ'}
+      {state.error ? <p role="alert" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{state.error}</p> : null}
+      <button type="submit" disabled={pending} className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-blue-700 px-5 font-semibold text-white shadow-lg shadow-blue-950/15 transition hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-200 disabled:cursor-not-allowed disabled:bg-slate-400">
+        {pending ? <LoaderCircle className="h-5 w-5 animate-spin" /> : <LogIn className="h-5 w-5" />}
+        {pending ? 'กำลังเข้าสู่ระบบ...' : 'เข้าสู่ระบบ'}
       </button>
     </form>
   )

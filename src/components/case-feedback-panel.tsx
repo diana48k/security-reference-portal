@@ -5,6 +5,7 @@ import { useState, useTransition } from 'react'
 import { ThumbsDown, ThumbsUp } from 'lucide-react'
 
 import { submitCaseFeedbackAction } from '@/src/lib/actions/case-activity'
+import { trackAnalytics } from '@/src/lib/analytics/client'
 
 type CaseFeedbackPanelProps = {
   caseId: string
@@ -50,6 +51,7 @@ export function CaseFeedbackPanel({
           slug,
           isUseful: nextFeedback,
         })
+        trackAnalytics('feedback_submit', { entityType: 'case', entityId: caseId, metadata: { useful: nextFeedback } })
       } catch (error) {
         setFeedback(initialFeedback)
         setErrorMessage(

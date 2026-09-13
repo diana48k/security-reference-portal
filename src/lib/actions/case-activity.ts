@@ -18,54 +18,6 @@ function getCasePath(slug: string) {
   return `/cases/${slug}`
 }
 
-export async function recordCaseViewAction(caseId: string, slug?: string) {
-  if (!caseId) return null
-
-  const supabase = await createSupabaseServerClient()
-  const userId = await getCurrentUserId()
-
-  const { error: incrementError } = await supabase.rpc('increment_case_view', {
-    p_case_id: caseId,
-  })
-
-  if (incrementError) {
-    console.error('Unable to record case view.', incrementError)
-    return null
-  }
-
-  const { data: updatedCase, error: viewCountError } = await supabase
-    .from('case_studies')
-    .select('view_count')
-    .eq('id', caseId)
-    .maybeSingle()
-
-  if (viewCountError) {
-    console.error('Unable to load updated case view count.', viewCountError)
-  }
-
-  if (slug) {
-    revalidatePath(getCasePath(slug))
-  }
-
-  if (!userId) {
-    return updatedCase?.view_count ?? null
-  }
-
-  await supabase.from('user_case_views').upsert(
-    {
-      user_id: userId,
-      case_id: caseId,
-      viewed_at: new Date().toISOString(),
-    },
-    {
-      onConflict: 'user_id,case_id',
-    },
-  )
-
-  revalidatePath('/recent')
-  return updatedCase?.view_count ?? null
-}
-
 export async function toggleFavoriteAction({
   caseId,
   slug,

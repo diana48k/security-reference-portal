@@ -96,7 +96,15 @@ export async function getAdminDashboardStats(): Promise<AdminDashboardStats> {
     faqs.error
 
   if (firstError) {
-    throw new Error(firstError.message)
+    console.error('Unable to load admin dashboard content statistics.', firstError)
+
+    return {
+      totalCases: 0,
+      publishedCases: 0,
+      draftCases: 0,
+      categories: 0,
+      faqs: 0,
+    }
   }
 
   return {

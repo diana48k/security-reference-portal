@@ -34,8 +34,31 @@ export async function recordAnalyticsEvent(request: NextRequest, input: Analytic
   const { data: claimsData } = await supabase.auth.getClaims()
   const userId = typeof claimsData?.claims?.sub === 'string' ? claimsData.claims.sub : null
 
-  await admin.from('analytics_visitors').upsert({ visitor_hash: visitorHash, last_seen_at: now.toISOString() }, { onConflict: 'visitor_hash' })
-  if (!isFresh) await admin.from('analytics_sessions').insert({ id: sessionId, visitor_hash: visitorHash, user_id: userId, started_at: now.toISOString(), last_seen_at: now.toISOString() })
+  const { error: visitorError } = await admin
+    .from('analytics_visitors')
+    .upsert(
+      { visitor_hash: visitorHash, last_seen_at: now.toISOString() },
+      { onConflict: 'visitor_hash' },
+    )
+
+  if (visitorError) throw visitorError
+
+  if (!isFresh) {
+    const { error: sessionError } = await admin
+      .from('analytics_sessions')
+      .upsert(
+        {
+          id: sessionId,
+          visitor_hash: visitorHash,
+          user_id: userId,
+          started_at: now.toISOString(),
+          last_seen_at: now.toISOString(),
+        },
+        { onConflict: 'id' },
+      )
+
+    if (sessionError) throw sessionError
+  }
 
   const { count } = await admin.from('analytics_events').select('id', { count: 'exact', head: true }).eq('session_id', sessionId).gte('occurred_at', new Date(now.getTime() - 60_000).toISOString())
   if ((count ?? 0) >= 60) return { configured: true, inserted: false, rateLimited: true, cookies }

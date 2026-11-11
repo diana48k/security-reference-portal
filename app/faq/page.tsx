@@ -1,14 +1,16 @@
 import { HelpCircle } from 'lucide-react'
 
 import { PortalShell } from '@/src/components/portal-shell'
-import { getHomePageData } from '@/src/lib/queries/home'
+import { createSupabaseServerClient } from '@/src/lib/supabase/server'
 
 export const metadata = {
   title: 'FAQ',
 }
 
 export default async function FaqPage() {
-  const { faqs } = await getHomePageData()
+  const db = await createSupabaseServerClient()
+  const { data } = await db.from('faqs').select('id,question,answer').eq('is_active',true).is('case_id',null).order('sort_order')
+  const faqs = data ?? []
 
   return (
     <PortalShell>
@@ -37,6 +39,7 @@ export default async function FaqPage() {
             {faqs.map((faq) => (
               <article
                 key={faq.id}
+                id={`faq-${faq.id}`}
                 className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
               >
                 <h2 className="font-bold text-slate-950">{faq.question}</h2>

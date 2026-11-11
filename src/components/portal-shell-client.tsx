@@ -1,6 +1,8 @@
 'use client'
 
 import { useState } from 'react'
+import dynamic from 'next/dynamic'
+const AssistantWidget = dynamic(() => import('@/src/components/assistant-widget'), { ssr: false })
 
 import { PortalSidebar, type PortalVisitorCounter } from '@/src/components/portal-sidebar'
 import { PortalTopbar } from '@/src/components/portal-topbar'
@@ -36,6 +38,7 @@ export function PortalShellClient({ children, user, visitorCounter, notification
           <main className="px-4 py-6 lg:px-8 lg:py-8">{children}</main>
         </div>
       </div>
+      <AssistantWidget key={user?.id ?? 'public'} userId={user?.id} />
     </div>
   )
 }

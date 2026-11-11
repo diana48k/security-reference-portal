@@ -75,6 +75,8 @@ const workspaceNav: NavItem[] = [
 ]
 
 const adminNav: NavItem[] = [
+  { href: '/admin/assistant', label: 'ผู้ช่วย AI / ตั้งค่า', icon: HelpCircle },
+  { href: '/admin/assistant/inbox', label: 'Lead / Feedback AI', icon: FileQuestion },
   { href: '/admin', label: 'แดชบอร์ดผู้ดูแล', icon: LayoutDashboard, match: ['/admin'] },
   { href: '/admin/cases', label: 'จัดการเคส', icon: FolderKanban },
   { href: '/admin/cases/new', label: 'เพิ่มเคสใหม่', icon: UploadCloud },

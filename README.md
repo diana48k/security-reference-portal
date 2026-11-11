@@ -13,6 +13,8 @@ Next.js 16 + Supabase portal สำหรับคลังเคส เอก�
 
 ## Commands
 
+การติดตั้งผู้ช่วย AI นายช่าง (Gemini Free Tier / Avatar / Admin Inbox): ดู [คู่มือตั้งค่า](docs/assistant-setup.md) ฟีเจอร์ปิดเป็นค่าเริ่มต้นจน Admin Publish เปิดใช้งาน
+
 ```bash
 npm run dev
 npm run lint
